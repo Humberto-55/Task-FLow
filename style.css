@@ -1,0 +1,857 @@
+/* --- Variables de Color Base (Tema Claro) --- */
+:root {
+  --primary-color: #00796B; /* Teal - Marca / Énfasis */
+  --secondary-color: #38A1FF; /* Azul brillante para botones */
+  --favorite-color: #FFD700; /* Oro para Favoritos (Nuevo) */
+  --bg-light: #E6F7FF; /* Fondo general (Azul claro del prototipo) */
+  --bg-card: #FFFFFF; /* Fondo de tarjetas de tarea */
+  --text-color: #333333;
+  --success-color: #4CAF50;
+  --danger-color: #DC3545;
+  --focus-ring-color: #38A1FF; /* Azul para enfoque de accesibilidad */
+  --task-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Estilos Generales y Reset --- */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  transition: background-color 0.3s, color 0.3s;
+  min-height: 100vh;
+}
+
+main {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+/* --- Encabezado: Diseño más moderno --- */
+header {
+  background-color: var(--bg-light);
+  padding: 20px 0 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-container h1 {
+    font-size: 1.5em;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.tagline {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin: 5px 0 0;
+    width: 100%; 
+    text-align: left;
+}
+
+/* --- Campo de Entrada de Tarea (Estilo Prototipo) --- */
+.task-input-container {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  align-items: center;
+}
+
+.task-input-container input,
+.task-input-container select {
+  padding: 12px;
+  border-radius: 25px; 
+  border: 1px solid #ced4da;
+  font-size: 1em;
+  background-color: var(--bg-card);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.task-input-container input {
+  flex-grow: 1; 
+  padding-left: 18px;
+}
+
+.task-input-container select {
+    min-width: 130px;
+}
+
+/* Estilo para el placeholder del select */
+.task-input-container select option[value=""][disabled] {
+    color: #999;
+}
+.task-input-container select:invalid {
+    color: #999;
+}
+
+.task-input-container button {
+  padding: 12px 15px;
+  border-radius: 25px;
+  border: none;
+  background-color: var(--secondary-color);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.task-input-container button:hover {
+  background-color: #0069D9;
+}
+
+/* --- Lista de Tareas: Controles y Estilo de Tarjeta --- */
+.task-list-container h2 {
+    color: var(--text-color);
+    font-size: 1.2em;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+/* Contenedor para título y botón de ordenar */
+#task-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Estilo para el botón de ordenar */
+#sortTasksBtn {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 8px 15px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+#sortTasksBtn:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+
+.task-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.task-list li {
+  background-color: var(--bg-card);
+  margin-bottom: 12px;
+  padding: 15px;
+  border-radius: 15px; 
+  box-shadow: var(--task-box-shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s;
+  border: 1px solid transparent; 
+}
+
+.task-list li:hover {
+  background-color: #f7f7f7;
+}
+
+.task-list li span {
+    flex-grow: 1; 
+    padding-right: 15px;
+}
+
+/* --- Indicadores de Prioridad --- */
+.task-list li.low {
+    border-left: 5px solid var(--success-color);
+}
+.task-list li.medium {
+    border-left: 5px solid #FFC107; /* Amarillo */
+}
+.task-list li.high {
+    border-left: 5px solid var(--danger-color);
+    font-weight: 600;
+}
+
+/* Indicador de Tarea Favorita (Borde Amarillo alrededor) */
+.task-list li.favorite {
+    border: 2px solid var(--favorite-color); 
+    box-shadow: 0 0 10px var(--favorite-color); 
+}
+/* Asegurar que el borde de prioridad se mantenga */
+.task-list li.favorite.low { border-left-color: var(--success-color); }
+.task-list li.favorite.medium { border-left-color: #FFC107; }
+.task-list li.favorite.high { border-left-color: var(--danger-color); }
+
+
+/* Tarea Completada (Estilo del prototipo) */
+.task-list li.completed {
+  text-decoration: line-through;
+  color: #999;
+  opacity: 0.8;
+  border-left-color: #999 !important;
+  border-color: #999;
+}
+/* Restaurar el color del borde de favorito, pero tenue si está completada */
+.task-list li.completed.favorite {
+    border-color: rgba(255, 215, 0, 0.5); 
+    box-shadow: none; 
+}
+
+
+/* --- Botones de Acción (Eliminar, Editar, Favorito) --- */
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-buttons button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    pointer-events: visible;
+    font-size: 1.2em;
+    padding: 5px;
+    transition: color 0.2s, transform 0.1s;
+}
+
+.action-buttons button:hover {
+    transform: scale(1.1);
+}
+
+/* Botón de favorito: Estrella Vacía por defecto */
+button.favorite-btn {
+    color: #ffee00; 
+    font-size: 1.3em;
+}
+/* Botón de favorito: Estrella Rellena si es favorita */
+.task-list li.favorite button.favorite-btn {
+    color: var(--favorite-color);
+}
+
+
+button.delete-btn {
+  color: var(--danger-color);
+}
+button.delete-btn:hover {
+  color: #a00;
+}
+
+button.edit-btn {
+    color: var(--secondary-color);
+}
+button.edit-btn:hover {
+    color: #0069D9;
+}
+
+
+/* --- Accesibilidad y Enfoque --- */
+button:focus,
+input:focus,
+select:focus,
+.task-list li span:focus,
+#help-btn:focus,
+#sortTasksBtn:focus,
+#susSurveyBtn:focus {
+  outline: 3px solid var(--focus-ring-color);
+  outline-offset: 2px;
+  border-radius: 8px; 
+}
+
+/* --- Modo Alto Contraste (Fiel al prototipo negro) --- */
+body.high-contrast {
+  --primary-color: #00FFFF; /* Cyan */
+  --secondary-color: #FFD700; /* Oro */
+  --favorite-color: #FFD700; /* Oro */
+  --bg-light: #000000; /* Fondo totalmente negro */
+  --bg-card: #1C1C1C; /* Tarjetas muy oscuras */
+  --text-color: #FFFFFF;
+  --success-color: #00FF00;
+  --danger-color: #FF0000;
+  --focus-ring-color: #00FFFF;
+  --task-box-shadow: none;
+
+  background-color: var(--bg-light);
+  color: var(--text-color);
+}
+
+body.high-contrast header,
+body.high-contrast footer {
+    background-color: #000;
+    box-shadow: none;
+    border-bottom: 1px solid #333;
+    border-top: 1px solid #333;
+}
+body.high-contrast .tagline,
+body.high-contrast .contact-info a {
+    color: #CCC;
+}
+body.high-contrast .app-title {
+    color: var(--primary-color);
+}
+body.high-contrast .task-list li {
+  border: 1px solid #444; 
+}
+
+/* Alto Contraste: Favorito */
+body.high-contrast .task-list li.favorite {
+    border: 2px solid var(--favorite-color);
+    box-shadow: none;
+}
+body.high-contrast .task-list li.completed.favorite {
+    border-color: #8a8686; 
+}
+body.high-contrast button.favorite-btn {
+    border-color: #ffffff;
+    color: #ffd900;
+}
+body.high-contrast .task-list li.favorite button.favorite-btn {
+    color: var(--favorite-color);
+}
+body.high-contrast #sortTasksBtn {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+body.high-contrast #sortTasksBtn:hover {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+
+body.high-contrast .task-input-container input,
+body.high-contrast .task-input-container select {
+    background-color: #333;
+    color: white;
+    border-color: #555;
+}
+body.high-contrast .task-input-container button {
+    background-color: var(--secondary-color);
+    color: #000;
+    font-weight: bold;
+}
+body.high-contrast button.delete-btn {
+    color: var(--danger-color);
+}
+body.high-contrast button.edit-btn {
+    color: var(--primary-color);
+}
+
+/* --- Botón Flotante de Ayuda y Modal --- */
+#help-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1.5em;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 1000;
+}
+
+#help-btn:hover {
+    background-color: #005a4e;
+}
+
+body.high-contrast #help-btn {
+    background-color: var(--secondary-color);
+    color: #000;
+    border: 1px solid var(--primary-color);
+}
+
+
+/* --- Modal de Ayuda (FIX DE VISIBILIDAD) --- */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    
+    /* Ocultar por defecto, JS añadirá .visible para mostrar */
+    display: none; 
+}
+
+.modal.visible {
+    display: flex; 
+}
+
+.modal-content {
+    background-color: var(--bg-card);
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+    color: var(--primary-color);
+    margin-top: 0;
+}
+
+#close-modal-btn {
+    margin-top: 20px;
+    background-color: var(--danger-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+
+/* --- Pie de Página y Botón SUS --- */
+footer {
+  text-align: center;
+  font-size: 0.85em;
+  padding: 15px;
+  background-color: var(--bg-light);
+  color: var(--text-color);
+  border-top: 1px solid #ced4da;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.contact-info a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.contact-info a:hover {
+    text-decoration: underline;
+}
+/* --- Tooltips personalizados para botones de acción --- */
+.action-buttons button {
+  position: relative;
+}
+
+.action-buttons button::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%; /* arriba del botón */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: #fff;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 0.75em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.action-buttons button:hover::after {
+  opacity: 1;
+}
+/* --- Estilos para Encuestas CSAT y CES --- */
+.survey-section {
+  max-width: 600px;
+  margin: 30px auto;
+  background-color: var(--bg-card);
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: var(--task-box-shadow);
+}
+
+.survey-section h2 {
+  color: var(--primary-color);
+  text-align: center;
+}
+
+.survey-card {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 25px;
+  border: 1px solid #ddd;
+}
+
+.survey-card h3 {
+  margin-top: 0;
+  color: var(--secondary-color);
+}
+
+.rating-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  font-size: 0.9em;
+}
+
+.survey-btn {
+  display: block;
+  margin-top: 10px;
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.survey-btn:hover {
+  background-color: #0069D9;
+}
+
+.back-link, .footer-btn {
+  text-decoration: none;
+  color: var(--secondary-color);
+  font-weight: bold;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.back-link:hover, .footer-btn:hover {
+  text-decoration: underline;
+}
+/* --- NUEVOS ESTILOS PARA BOTÓN DE ESTADO (Completada/Fallida/Pendiente) --- */
+
+.task-list li .status-btn {
+    width: 28px;
+    height: 28px;
+    min-width: 28px; /* Asegura el tamaño fijo */
+    margin-right: 15px;
+    padding: 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    border: 2px solid var(--primary-color); /* Cuadrado blanco con borde primario */
+    border-radius: 8px;
+    background-color: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1; 
+}
+
+/* Estado de Tarea Completada (✅) */
+.task-list li.completed {
+    color: #999;
+    opacity: 0.8;
+    border-left-color: var(--success-color) !important;
+}
+
+.task-list li.completed .status-btn {
+    border-color: var(--success-color);
+    background-color: var(--success-color);
+    color: white;
+}
+/* Estilo para el texto cuando está COMPLETADA: TACHADO Y GRIS */
+.task-list li.completed span {
+    color: #999; 
+    text-decoration: line-through; 
+}
+
+/* Estado de Tarea Fallida (❌) */
+.task-list li.failed {
+    color: var(--danger-color); 
+    opacity: 0.9;
+    background-color: #fcebeb; 
+    border-left-color: var(--danger-color) !important;
+}
+.task-list li.failed .status-btn {
+    border-color: var(--danger-color);
+    background-color: var(--danger-color);
+    color: white;
+}
+/* Estilo para el texto cuando está FALLIDA: ROJO Y NO TACHADO */
+.task-list li.failed span {
+    color: var(--danger-color);
+    text-decoration: none; 
+}
+
+/* --- ESTILOS PARA LA LEYENDA DE ESTADO DE TAREA (Columna) --- */
+.task-status-legend {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85em;
+    color: #6c757d;
+    margin-bottom: 10px;
+    padding: 5px 15px;
+    border-bottom: 1px dashed #ced4da;
+}
+.task-status-legend p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.legend-icon {
+    font-size: 1.1em;
+    margin-right: 5px;
+    font-weight: bold;
+}
+.completed-icon {
+    color: var(--success-color);
+}
+.failed-icon {
+    color: var(--danger-color);
+}
+
+
+/* --- Ajuste para el modo Alto Contraste --- */
+body.high-contrast .task-list li.failed {
+    background-color: #330000; 
+    border-color: var(--danger-color);
+}
+body.high-contrast .task-list li.failed span {
+    color: var(--danger-color);
+}
+body.high-contrast .task-list li .status-btn {
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+body.high-contrast .task-list li.completed .status-btn,
+body.high-contrast .task-list li.failed .status-btn {
+    background-color: var(--text-color);
+    color: #000;
+}
+/* --- NUEVOS ESTILOS PARA SECCIONES DE PRIORIDAD --- */
+
+.task-status-legend {
+    /* Mantiene el estilo existente de la leyenda */
+    border-bottom: none; 
+    padding: 0 0 10px 0;
+}
+
+.priority-header {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 5px;
+    padding-left: 10px;
+    border-left: 5px solid;
+    color: var(--text-color);
+}
+
+.priority-header.high {
+    border-color: var(--danger-color); /* Rojo */
+}
+
+.priority-header.medium {
+    border-color: #FFC107; /* Amarillo */
+}
+
+.priority-header.low {
+    border-color: var(--success-color); /* Verde */
+}
+
+.priority-header.finalized {
+    border-color: #999; /* Gris */
+    color: #6c757d;
+}
+
+.task-group {
+    list-style: none;
+    padding: 0;
+    margin-top: 0;
+    min-height: 20px; /* Evita que el margen colapse si está vacío */
+}
+
+/* Tarea Completada (Subrayado/Tachado y gris) */
+.task-list li.completed span {
+    color: #999; 
+    text-decoration: line-through; 
+}
+.task-list li.completed {
+    color: #999;
+    opacity: 0.8;
+    border-left-color: var(--success-color) !important;
+}
+
+/* Tarea Fallida (No Tachado y color rojo) */
+.task-list li.failed span {
+    color: var(--danger-color);
+    text-decoration: none; 
+}
+.task-list li.failed {
+    color: var(--danger-color); 
+    opacity: 0.9;
+    background-color: #fcebeb; 
+    border-left-color: var(--danger-color) !important;
+}
+
+/* Ajustes para el modo Alto Contraste */
+body.high-contrast .priority-header.finalized {
+    color: #999;
+}
+body.high-contrast .task-list li.failed {
+    background-color: #330000; 
+    border-color: var(--danger-color);
+}
+
+/* Asegurar que el tooltip se vea bien con la nueva estructura */
+.action-buttons button::after {
+    bottom: 150%; 
+}
+/* --- Variables de Color Base (Tema Claro) --- */
+:root {
+  --primary-color: #00796B; /* Teal - Marca / Énfasis */
+  --secondary-color: #38A1FF; /* Azul brillante para botones */
+  --favorite-color: #FFD700; /* Oro para Favoritos */
+  --bg-light: #E6F7FF; 
+  --bg-card: #FFFFFF; 
+  --text-color: #333333;
+  --success-color: #4CAF50; /* Verde para completado */
+  --danger-color: #DC3545; /* Rojo para fallido/alta prioridad */
+  --focus-ring-color: #38A1FF; 
+  --task-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- AJUSTE DEL ENCABEZADO Y CONTROLES --- */
+
+.header-content {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-grow: 1; /* Permite que tome el espacio disponible */
+    order: 1;
+}
+
+.tagline {
+    font-size: 0.9em;
+    color: #6c757d;
+    margin: 5px 0 0;
+    width: 100%; 
+    text-align: left;
+    order: 3; /* Asegura que el tagline vaya abajo y ocupe todo el ancho */
+}
+
+/* --- CONTROLES DE ACCESIBILIDAD MOVIDOS A LA DERECHA --- */
+.controls-access {
+    display: flex;
+    gap: 10px;
+    order: 2; /* Mover a la derecha */
+    margin-left: auto; /* Empujar a la derecha */
+}
+
+#contrast-toggle, #daltonism-toggle {
+    background: var(--bg-card);
+    color: var(--text-color);
+    border: 1px solid #ced4da;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s;
+}
+
+/* --- ESTILOS DE SECCIONES FINALIZADAS --- */
+
+.priority-header.completed-header {
+    border-color: var(--success-color); /* Verde */
+}
+.priority-header.failed-header {
+    border-color: var(--danger-color); /* Rojo */
+}
+
+/* --- NUEVO MODO DALTONISMO (Dichromacy - Protanopia/Deuteranopia) --- */
+/* Cambiamos el verde/rojo a naranja/rojo y aumentamos el contraste perceptivo */
+body.daltonism-mode {
+    --primary-color: #006699; /* Azul más profundo y distinto al verde/rojo */
+    --secondary-color: #9933FF; /* Púrpura brillante */
+    --success-color: #FF8800; /* Naranja/Ámbar fuerte (reemplaza al verde) */
+    --danger-color: #FF0000; /* Rojo puro, bien definido */
+    --favorite-color: #38A1FF; /* Azul claro para favoritos */
+}
+
+body.daltonism-mode .task-list li.low {
+    border-left-color: var(--success-color); /* Ámbar/Naranja */
+}
+body.daltonism-mode .task-list li.medium {
+    border-left-color: var(--secondary-color); /* Púrpura */
+}
+body.daltonism-mode .task-list li.high {
+    border-left-color: var(--danger-color); /* Rojo */
+}
+
+body.daltonism-mode .task-list li.completed {
+    border-left-color: #555 !important;
+}
+body.daltonism-mode .task-list li.completed .status-btn {
+    background-color: #555;
+    color: white;
+}
+body.daltonism-mode .task-list li.failed .status-btn {
+    background-color: var(--danger-color);
+}
+/* Asegura que el fondo de las tarjetas en modo daltonismo sea legible */
+body.daltonism-mode .task-list li.failed {
+    background-color: #fff0f0; /* Fondo más suave para el rojo */
+}
+
+/* --- ESTILOS DEL MODAL DE BIENVENIDA --- */
+.welcome-modal {
+    z-index: 3000; 
+    /* Estilos del modal se mantienen (display: flex cuando tiene la clase visible) */
+}
+.welcome-modal .modal-content {
+    max-width: 500px;
+}
+.welcome-modal p {
+    font-size: 1.1em;
+    line-height: 1.5;
+}
+/* --- NUEVOS ESTILOS PARA SECCIÓN FAVORITAS --- */
+.priority-header.favorite-header {
+    border-color: var(--favorite-color); /* Color de la estrella (Oro) */
+    font-size: 1.2em;
+    padding: 10px 0;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+/* Ajuste para el modo Daltonismo */
+body.daltonism-mode .priority-header.favorite-header {
+    border-color: var(--favorite-color); /* Azul claro en modo daltonismo */
+}

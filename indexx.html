@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Flow | Calidad y velocidad</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+        <div class="logo-container">
+            <img src="TaskFlow.png" alt="Logo de Task Flow" width="110"> 
+            <h1 class="app-title">TASK FLOW</h1>
+        </div>
+        <p class="tagline">Calidad y velocidad en cada paso</p>
+
+        <div class="controls-access">
+            <button id="contrast-toggle" aria-label="Activar o desactivar modo alto contraste" title="Modo Alto Contraste">
+                <span class="icon" aria-hidden="true">🔆</span> Modo Alto Contraste
+            </button>
+            <button id="daltonism-toggle" aria-label="Activar o desactivar modo daltónico" title="Modo Daltonismo">
+                <span class="icon" aria-hidden="true">🎨</span> Modo Daltonismo
+            </button>
+        </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="task-input-container">
+      <input type="text" id="taskInput" placeholder="Escribe una nueva tarea..." aria-label="Campo para nueva tarea" autocomplete="off">
+      
+      <select id="prioritySelect" aria-label="Seleccionar prioridad de la tarea">
+        <option value="" disabled selected>Elige la prioridad</option>
+        <option value="low">Baja</option>
+        <option value="medium">Media</option>
+        <option value="high">Alta</option>
+      </select>
+      
+      <button id="addTaskBtn" title="Agregar tarea">
+          <span class="icon" aria-hidden="true">➕</span> Agregar
+      </button>
+    </section>
+
+    <section class="task-list-container">
+        <h2>Organizador de Tareas</h2>
+        
+        <div class="task-status-legend">
+            <p><strong>Marcar tarea como:</strong></p>
+            <p><span class="legend-icon completed-icon">✅</span> Completada | <span class="legend-icon failed-icon">❌</span> No Completada</p>
+        </div>
+
+        <h3 class="priority-header favorite-header">⭐ Tareas Favoritas (Pendientes)</h3>
+        <ul id="favorite-tasks-list" class="task-group favorite-group" aria-live="polite"></ul>
+
+        <div id="active-tasks-container">
+            <h3 class="priority-header high">🔥 Prioridad Alta (¡Hacer Ahora!)</h3>
+            <ul id="high-priority-list" class="task-group high-group" aria-live="polite"></ul>
+            
+            <h3 class="priority-header medium"> 🏃‍♂️ Prioridad Media (Todo a tu tiempo)</h3>
+            <ul id="medium-priority-list" class="task-group medium-group" aria-live="polite"></ul>
+            
+            <h3 class="priority-header low">📥 Prioridad Baja (Con calma, tienes tiempo)</h3>
+            <ul id="low-priority-list" class="task-group low-group" aria-live="polite"></ul>
+        </div>
+        
+        <h3 class="priority-header completed-header">✅ Tareas Completadas</h3>
+        <ul id="completed-tasks-list" class="task-group completed-group" aria-live="polite"></ul>
+        
+        <h3 class="priority-header failed-header">❌ Tareas No Completadas</h3>
+        <ul id="failed-tasks-list" class="task-group failed-group" aria-live="polite"></ul>
+    </section>
+  </main>
+
+  <button id="help-btn" aria-controls="help-modal" title="Dudas y Sugerencias">
+      ?
+  </button>
+
+  <footer>
+    <p>© 2025 Task Flow — Desarrollado por Autonomous Hearing</p>
+    <p class="contact-info">Problemas técnicos: <a href="mailto:soporte@autonomoushearing.com">soporte@autonomoushearing.com</a></p>
+  </footer>
+
+  <div id="help-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-content">
+        <h3 id="modal-title">¿Cómo te podemos ayudar?</h3>
+        <p>Selecciona la opción que se ajuste a tu necesidad. Serás dirigido a un formulario externo para brindarte la mejor atención.</p>
+        
+        <a href="#" target="_blank" class="survey-btn modal-option-btn" id="link-dudas">Tengo una Duda o Sugerencia</a>
+        
+        <a href="#" target="_blank" class="survey-btn modal-option-btn danger-btn" id="link-tecnico">Reportar un Problema Técnico</a>
+        
+        <button id="close-modal-btn" aria-label="Cerrar ventana de ayuda" class="close-modal-inside-btn">Cerrar</button>
+    </div>
+  </div>
+  
+  <div id="welcome-modal" class="modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+      <div class="modal-content">
+          <h3 id="welcome-title">¡Bienvenido a Task Flow!</h3>
+          <p>Estás en el sitio para planificar y contemplar todos tus pendientes, llevando un seguimiento de ellos. No tendrás por qué preocuparte de olvidarte de algo que tienes que hacer, ya que sea en donde te encuentres llevas tu lista de actividades contigo para así cumplir un logro a la vez sin pendientes en un santiamén.</p>
+          <button id="close-welcome-btn" class="survey-btn">Comenzar a Organizar</button>
+      </div>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>
