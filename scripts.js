@@ -3,6 +3,8 @@
 // ===================================
 const addTaskBtn = document.getElementById('addTaskBtn');
 const taskInput = document.getElementById('taskInput');
+const dateInput = document.getElementById('dateInput');
+const timeInput = document.getElementById('timeInput');
 const prioritySelect = document.getElementById('prioritySelect');
 const contrastToggle = document.getElementById('contrast-toggle');
 const daltonismToggle = document.getElementById('daltonism-toggle');
@@ -18,80 +20,65 @@ const lowPriorityList = document.getElementById('low-priority-list');
 const completedTasksList = document.getElementById('completed-tasks-list');
 const failedTasksList = document.getElementById('failed-tasks-list');
 
-// Modal de Bienvenida
+// Modal de Bienvenida y Ayuda
 const welcomeModal = document.getElementById('welcome-modal');
 const closeWelcomeBtn = document.getElementById('close-welcome-btn');
-
-// Elementos del modal de ayuda para inyectar URLs
 const linkDudas = document.getElementById('link-dudas');
 const linkTecnico = document.getElementById('link-tecnico');
+
+// NUEVOS ELEMENTOS DEL MODAL DE RECUPERACIÓN
+const recoveryModal = document.getElementById('recovery-modal');
+const failureReasonInput = document.getElementById('failure-reason');
+const confirmReasonBtn = document.getElementById('confirm-reason-btn');
+const reassignTaskBtn = document.getElementById('reassign-task-btn');
+let currentFailedTaskElement = null; // Para guardar la tarea sobre la que se hizo clic
 
 
 // Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
-    setupFormLinks(); // <--- LLAMADA A LA FUNCIÓN DE INYECCIÓN DE URLS
+    setupFormLinks();
     loadTasks();
     showWelcomeModal(); 
+    setInterval(checkTaskDeadlines, 60000); // Verifica cada minuto
 });
 
-// Eventos de Tareas
+// Eventos de Tareas (se mantienen)
 addTaskBtn.addEventListener('click', addTask);
 taskInput.addEventListener('keypress', function(e) {
   if (e.key === 'Enter') addTask();
 });
-
-// Eventos de Accesibilidad
 contrastToggle.addEventListener('click', () => {
   document.body.classList.toggle('high-contrast');
   localStorage.setItem('highContrastMode', document.body.classList.contains('high-contrast'));
 });
-
 daltonismToggle.addEventListener('click', () => {
     document.body.classList.toggle('daltonism-mode');
     localStorage.setItem('daltonismMode', document.body.classList.contains('daltonism-mode'));
 });
-
-// Modal de Ayuda (se mantiene)
-helpBtn.addEventListener('click', () => {
-    helpModal.classList.add('visible'); 
-    helpModal.removeAttribute('hidden');
-    closeModalBtn.focus(); 
-});
-closeModalBtn.addEventListener('click', () => {
-    helpModal.classList.remove('visible'); 
-    helpModal.setAttribute('hidden', '');
-    helpBtn.focus();
-});
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
-        helpModal.classList.remove('visible');
-        helpModal.setAttribute('hidden', '');
-        helpBtn.focus();
-    }
-});
-
-
-// Lógica para asignar URLs a los botones del modal de ayuda
+// (Resto de la lógica de modales de ayuda y setupFormLinks se mantiene...)
 function setupFormLinks() {
-    // URLS FINALES INYECTADAS
     const URL_DUDAS = "https://forms.gle/VWrE8LM4ZcWuhyjE7";
     const URL_TECNICO = "https://forms.gle/p99c2zg594rTzick6";
-    
     if (linkDudas) linkDudas.href = URL_DUDAS;
     if (linkTecnico) linkTecnico.href = URL_TECNICO;
 }
 
-// Modal de Bienvenida (Se mantiene)
+helpBtn.addEventListener('click', () => {
+    helpModal.classList.add('visible'); helpModal.removeAttribute('hidden'); closeModalBtn.focus(); 
+});
+closeModalBtn.addEventListener('click', () => {
+    helpModal.classList.remove('visible'); helpModal.setAttribute('hidden', ''); helpBtn.focus();
+});
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
+        helpModal.classList.remove('visible'); helpModal.setAttribute('hidden', ''); helpBtn.focus();
+    }
+});
 function showWelcomeModal() {
     const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
-    
-    if (hasSeenWelcome) {
-        return;
-    }
-    
+    if (hasSeenWelcome) return;
     welcomeModal.classList.add('visible');
     welcomeModal.removeAttribute('hidden');
-    
     closeWelcomeBtn.addEventListener('click', () => {
         welcomeModal.classList.remove('visible');
         welcomeModal.setAttribute('hidden', '');
@@ -102,38 +89,162 @@ function showWelcomeModal() {
 
 
 // ===================================
-// 2. LÓGICA DE TAREAS Y MOVIMIENTO
+// 3. LÓGICA DE RECUPERACIÓN DE TAREAS
 // ===================================
 
 /**
- * Retorna el contenedor UL correcto basado en el estado y prioridad.
+ * Muestra el modal de recuperación y guarda la referencia de la tarea.
+ */
+function handleFailedTaskClick(li) {
+    if (!li.classList.contains('failed')) return; // Solo funciona en tareas fallidas
+    
+    currentFailedTaskElement = li;
+    recoveryModal.classList.add('visible');
+    recoveryModal.removeAttribute('hidden');
+    failureReasonInput.value = ''; // Limpiar el input
+
+    // Ocultar modal de ayuda si estaba abierto
+    helpModal.classList.remove('visible');
+    helpModal.setAttribute('hidden', '');
+}
+
+/**
+ * Lógica para REASIGNAR la tarea
+ */
+reassignTaskBtn.addEventListener('click', () => {
+    if (!currentFailedTaskElement) return;
+
+    // Abrir el modal de edición con la información actual
+    const taskTextSpan = currentFailedTaskElement.querySelector('span');
+    const newText = prompt('Reasigna la tarea - Nuevo texto:', taskTextSpan.textContent);
+    const newDate = prompt('Reasigna la tarea - Nueva fecha (YYYY-MM-DD):', currentFailedTaskElement.dataset.date);
+    const newTime = prompt('Reasigna la tarea - Nueva hora (HH:MM):', currentFailedTaskElement.dataset.time);
+
+    if (newText !== null && newText.trim() !== '') {
+        // 1. Actualizar datos
+        taskTextSpan.textContent = newText.trim();
+        currentFailedTaskElement.dataset.date = newDate || '';
+        currentFailedTaskElement.dataset.time = newTime || '';
+        
+        // 2. Mover de Fallida a Pendiente (Alta/Media/Baja)
+        currentFailedTaskElement.classList.remove('failed');
+        currentFailedTaskElement.querySelector('.status-btn').textContent = '⬜';
+
+        // 3. Actualizar la visualización de la fecha
+        const dateDisplay = currentFailedTaskElement.querySelector('.date-display');
+        let nuevoVencimientoTexto = 'Sin fecha';
+        if (newDate) {
+            nuevoVencimientoTexto = `Vence: ${new Date(newDate).toLocaleDateString()}`;
+            if (newTime) {
+                nuevoVencimientoTexto += `<br>Hora: ${newTime}`; // CAMBIO: Usar <br>
+            }
+        }
+        dateDisplay.innerHTML = nuevoVencimientoTexto; // CAMBIO: Usar innerHTML
+
+        // Mover y guardar
+        getTargetList(currentFailedTaskElement).appendChild(currentFailedTaskElement);
+        reorderList(getTargetList(currentFailedTaskElement));
+        reorderList(failedTasksList); 
+        saveTasks();
+    }
+    
+    // Cerrar modal
+    recoveryModal.classList.remove('visible');
+    recoveryModal.setAttribute('hidden', '');
+    currentFailedTaskElement = null;
+});
+
+/**
+ * Lógica para ARCHIVAR la tarea (Simplemente la eliminamos si es vencida o fallida)
+ */
+confirmReasonBtn.addEventListener('click', () => {
+    if (!currentFailedTaskElement) return;
+
+    const reason = failureReasonInput.value.trim();
+    const taskName = currentFailedTaskElement.querySelector('span').textContent;
+    
+    if (reason) {
+        console.log(`TAREA ARCHIVADA: ${taskName}. Motivo: ${reason}`);
+        alert(`Motivo '${reason}' registrado. Tarea archivada.`);
+    } else {
+        alert('Tarea archivada sin motivo.');
+    }
+    
+    // Eliminar la tarea y guardar
+    currentFailedTaskElement.remove();
+    saveTasks();
+    
+    // Cerrar modal
+    recoveryModal.classList.remove('visible');
+    recoveryModal.setAttribute('hidden', '');
+    currentFailedTaskElement = null;
+});
+
+
+// ===================================
+// 4. LÓGICA DE TAREAS Y MOVIMIENTO
+// ===================================
+
+/**
+ * Verifica si una tarea ha vencido y la mueve si es necesario. (Se mantiene)
+ */
+function checkTaskDeadlines() {
+    const activeLists = [favoriteTasksList, highPriorityList, mediumPriorityList, lowPriorityList];
+    
+    activeLists.forEach(ulElement => {
+        ulElement.querySelectorAll('li').forEach(li => {
+            const date = li.dataset.date;
+            const time = li.dataset.time;
+            
+            if (date) {
+                const deadline = new Date(`${date}T${time || '23:59:59'}`);
+                const now = new Date();
+                
+                if (deadline < now) {
+                    if (!li.classList.contains('completed') && !li.classList.contains('failed')) {
+                        
+                        li.classList.remove('favorite');
+                        li.classList.add('failed'); 
+                        
+                        const statusBtn = li.querySelector('.status-btn');
+                        if (statusBtn) statusBtn.textContent = '❌'; 
+                        
+                        failedTasksList.appendChild(li);
+                        
+                        reorderList(failedTasksList);
+                        reorderList(ulElement);
+                        saveTasks();
+                        console.log(`Tarea vencida movida: ${li.querySelector('span').textContent}`);
+                    }
+                }
+            }
+        });
+    });
+}
+
+
+/**
+ * Retorna el contenedor UL correcto basado en el estado y prioridad. (Se mantiene)
  */
 function getTargetList(li) {
     const isCompleted = li.classList.contains('completed');
     const isFailed = li.classList.contains('failed');
     const isFavorite = li.classList.contains('favorite');
 
-    if (isCompleted) {
-        return completedTasksList; 
-    }
-    if (isFailed) {
-        return failedTasksList; 
-    } 
+    if (isCompleted) return completedTasksList; 
+    if (isFailed) return failedTasksList; 
     
-    // Tareas activas (Pendientes)
-    if (isFavorite) {
-        return favoriteTasksList; 
-    } else {
-        // No favoritas pendientes (secciones de prioridad)
-        if (li.classList.contains('high')) return highPriorityList;
-        if (li.classList.contains('medium')) return mediumPriorityList;
-        if (li.classList.contains('low')) return lowPriorityList;
-    }
+    if (isFavorite) return favoriteTasksList; 
+    
+    if (li.classList.contains('high')) return highPriorityList;
+    if (li.classList.contains('medium')) return mediumPriorityList;
+    if (li.classList.contains('low')) return lowPriorityList;
+
     return lowPriorityList; 
 }
 
 /**
- * Función que ordena la lista localmente (Favoritos primero)
+ * Función que ordena la lista localmente (Favoritos primero) (Se mantiene)
  */
 function reorderList(ulElement) {
     const tasks = Array.from(ulElement.querySelectorAll('li'));
@@ -147,9 +258,9 @@ function reorderList(ulElement) {
         }
         return 0; 
     });
-
     tasks.forEach(task => ulElement.appendChild(task));
 }
+
 
 /**
  * Función que alterna el estado de la tarea y MUEVE el elemento si es necesario.
@@ -158,30 +269,23 @@ function toggleTaskStatus(li) {
     let newStatusIcon;
     const currentList = li.parentElement;
     
-    // 1. Determinar el NUEVO estado
     if (li.classList.contains('completed')) {
-        // De Completada (✅) pasa a No Completada (❌)
         li.classList.remove('completed');
         li.classList.add('failed');
         newStatusIcon = '❌';
     } else if (li.classList.contains('failed')) {
-        // De Fallida (❌) pasa a Pendiente (⬜)
         li.classList.remove('failed');
-        // El estado favorito se mantendrá si pasa a Pendiente
         newStatusIcon = '⬜';
     } else {
-        // De Pendiente (⬜) pasa a Completada (✅)
         li.classList.add('completed');
         newStatusIcon = '✅';
     }
     
-    // 2. Mover la tarea a la lista correcta
     const targetList = getTargetList(li);
     if (currentList !== targetList) {
         targetList.appendChild(li);
     }
     
-    // 3. Reordenar las listas involucradas
     reorderList(targetList);
     if (currentList && currentList !== targetList) {
         reorderList(currentList); 
@@ -194,39 +298,65 @@ function toggleTaskStatus(li) {
 /**
  * Crea la estructura LI para una tarea...
  */
-function createTaskElement(text, priority, completed, favorite = false, failed = false) { 
+function createTaskElement(text, priority, completed, favorite = false, failed = false, date = '', time = '') { 
     const li = document.createElement('li');
     li.classList.add(priority);
     if (completed) li.classList.add('completed');
     if (failed) li.classList.add('failed');
     if (favorite) li.classList.add('favorite');
 
+    const taskContent = document.createElement('div');
+    taskContent.classList.add('task-content-wrapper');
+
     const span = document.createElement('span');
     span.textContent = text;
     
-    // --- NUEVO BOTÓN DE ESTADO ---
+    // --- FECHA Y HORA ---
+    const dateDisplay = document.createElement('small');
+    dateDisplay.classList.add('date-display');
+    
+    let vencimientoTexto = 'Sin fecha';
+    if (date) {
+        vencimientoTexto = ` Vence: ${new Date(date).toLocaleDateString()}`;
+        if (time) {
+            vencimientoTexto += `<br>Hora: ${time}`; // CAMBIO: Usar <br>
+        }
+    }
+    dateDisplay.innerHTML = vencimientoTexto; // CAMBIO: Usar innerHTML
+
+    taskContent.appendChild(span);
+    taskContent.appendChild(dateDisplay);
+    
+    // --- BOTÓN DE ESTADO ---
     const statusBtn = document.createElement('button');
     statusBtn.classList.add('status-btn');
     statusBtn.setAttribute('aria-label', 'Marcar estado de tarea');
     statusBtn.setAttribute('title', 'Marcar tarea como completada, fallida o pendiente');
     statusBtn.setAttribute('data-tooltip', 'Marcar tarea como completada, fallida o pendiente');
-
     
-    // Icono inicial
     if (completed) { statusBtn.textContent = '✅'; } 
     else if (failed) { statusBtn.textContent = '❌'; } 
     else { statusBtn.textContent = '⬜'; }
 
-    // Evento de click para cambiar el estado
     statusBtn.addEventListener('click', () => {
         statusBtn.textContent = toggleTaskStatus(li);
         saveTasks();
     });
 
+    // Permitir clic en la tarea fallida para abrir el modal de justificación
+    if (failed) {
+        li.addEventListener('click', (e) => {
+            // Asegurar que el clic no fue en un botón de acción
+            if (!e.target.closest('.action-buttons')) {
+                handleFailedTaskClick(li);
+            }
+        });
+    }
+
     const actionButtons = document.createElement('div');
     actionButtons.classList.add('action-buttons');
     
-    // Botón FAVORITO (El click requiere reordenar la lista actual y la lógica de movimiento)
+    // Botón Favorito (se mantiene)
     const favoriteBtn = document.createElement('button');
     favoriteBtn.textContent = favorite ? '★' : '☆'; 
     favoriteBtn.classList.add('favorite-btn');
@@ -239,7 +369,6 @@ function createTaskElement(text, priority, completed, favorite = false, failed =
         li.classList.toggle('favorite');
         favoriteBtn.textContent = li.classList.contains('favorite') ? '★' : '☆'; 
         
-        // Si la tarea NO está finalizada (pendiente), moverla a la sección Favoritos o de Prioridad
         if (!li.classList.contains('completed') && !li.classList.contains('failed')) {
              const targetList = getTargetList(li);
              if (currentList !== targetList) {
@@ -248,11 +377,10 @@ function createTaskElement(text, priority, completed, favorite = false, failed =
         }
         
         if (currentList) { reorderList(currentList); }
-        
         saveTasks();
     });
 
-    // Botón EDITAR (Se mantiene)
+    // Botón Editar (se mantiene)
     const editBtn = document.createElement('button');
     editBtn.textContent = '✏️';
     editBtn.classList.add('edit-btn');
@@ -261,16 +389,30 @@ function createTaskElement(text, priority, completed, favorite = false, failed =
     editBtn.setAttribute('data-tooltip', 'Editar tarea'); 
     
     editBtn.addEventListener('click', () => {
-        const currentText = span.textContent;
-        const newText = prompt('Editar tarea:', currentText);
+        const newText = prompt('Editar texto de la tarea:', span.textContent);
+        const newDate = prompt('Editar fecha (YYYY-MM-DD), deje vacío para borrar:', date);
+        const newTime = prompt('Editar hora (HH:MM), deje vacío para borrar:', time); 
 
         if (newText !== null && newText.trim() !== '') {
             span.textContent = newText.trim();
-            saveTasks();
         }
+        
+        li.dataset.date = newDate || '';
+        li.dataset.time = newTime || '';
+
+        let nuevoVencimientoTexto = 'Sin fecha';
+        if (newDate) {
+            nuevoVencimientoTexto = `Vence: ${new Date(newDate).toLocaleDateString()}`;
+            if (newTime) {
+                nuevoVencimientoTexto += `<br>Hora: ${newTime}`;
+            }
+        }
+        dateDisplay.innerHTML = nuevoVencimientoTexto;
+
+        saveTasks();
     });
 
-    // Botón eliminar (Se mantiene)
+    // Botón eliminar (se mantiene)
     const deleteBtn = document.createElement('button');
     deleteBtn.textContent = '🗑';
     deleteBtn.classList.add('delete-btn');
@@ -287,28 +429,33 @@ function createTaskElement(text, priority, completed, favorite = false, failed =
 
     // Ensamblaje
     li.appendChild(statusBtn); 
-    li.appendChild(span);
+    li.appendChild(taskContent); 
     actionButtons.appendChild(favoriteBtn);
     actionButtons.appendChild(editBtn);
     actionButtons.appendChild(deleteBtn);
     li.appendChild(actionButtons);
     
+    li.dataset.date = date;
+    li.dataset.time = time;
+    
     return li;
 }
 
 /**
- * Añade una nueva tarea y la pone en su sección de prioridad.
+ * Añade una nueva tarea, FECHA, HORA, y la pone en su sección de prioridad. (Se mantiene)
  */
 function addTask() {
     const taskText = taskInput.value.trim();
     const selectedPriority = prioritySelect.value;
+    const selectedDate = dateInput.value; 
+    const selectedTime = timeInput.value; 
     
     if (taskText === '' || selectedPriority === '') {
         alert('Por favor, escribe la tarea y elige una prioridad válida.');
         return;
     }
 
-    const newTask = createTaskElement(taskText, selectedPriority, false, false, false); 
+    const newTask = createTaskElement(taskText, selectedPriority, false, false, false, selectedDate, selectedTime); 
     
     const targetList = getTargetList(newTask);
     targetList.appendChild(newTask);
@@ -316,6 +463,8 @@ function addTask() {
     reorderList(targetList);
 
     taskInput.value = '';
+    dateInput.value = ''; 
+    timeInput.value = ''; 
     prioritySelect.value = ''; 
     taskInput.focus();
     
@@ -323,7 +472,7 @@ function addTask() {
 }
 
 /**
- * Guarda las tareas en LocalStorage (Persistencia).
+ * Guarda las tareas en LocalStorage (Persistencia). Incluye la fecha y hora. (Se mantiene)
  */
 function saveTasks() {
     const tasks = [];
@@ -332,21 +481,22 @@ function saveTasks() {
         const completed = li.classList.contains('completed');
         const failed = li.classList.contains('failed');
         const favorite = li.classList.contains('favorite');
+        const date = li.dataset.date || ''; 
+        const time = li.dataset.time || '';
         
         let priority = 'low'; 
         if (li.classList.contains('medium')) priority = 'medium';
         if (li.classList.contains('high')) priority = 'high';
 
-        tasks.push({ text, completed, failed, priority, favorite }); 
+        tasks.push({ text, completed, failed, priority, favorite, date, time }); 
     });
     localStorage.setItem('tasks', JSON.stringify(tasks));
 }
 
 /**
- * Carga las tareas desde LocalStorage al iniciar y las distribuye.
+ * Carga las tareas desde LocalStorage al iniciar y las distribuye. (Se mantiene)
  */
 function loadTasks() {
-    // Cargar modos de accesibilidad
     const isHighContrast = localStorage.getItem('highContrastMode') === 'true';
     if (isHighContrast) { document.body.classList.add('high-contrast'); }
     
@@ -357,18 +507,19 @@ function loadTasks() {
     if (storedTasks) {
         const tasks = JSON.parse(storedTasks);
         tasks.forEach(task => {
-            const taskElement = createTaskElement(task.text, task.priority, task.completed, task.favorite, task.failed);
+            const taskElement = createTaskElement(task.text, task.priority, task.completed, task.favorite, task.failed, task.date, task.time);
             const targetList = getTargetList(taskElement); 
             targetList.appendChild(taskElement);
         });
         
-        // Reordenar todas las listas al final de la carga 
         reorderList(favoriteTasksList);
         reorderList(highPriorityList);
         reorderList(mediumPriorityList);
         reorderList(lowPriorityList);
         reorderList(completedTasksList);
         reorderList(failedTasksList);
+        
+        checkTaskDeadlines();
     }
     
     prioritySelect.value = ''; 
