@@ -30,6 +30,14 @@
     <section class="task-input-container">
       <input type="text" id="taskInput" placeholder="Escribe una nueva tarea..." aria-label="Campo para nueva tarea" autocomplete="off">
       
+      <div class="date-time-group">
+          <label for="dateInput" class="date-time-label">Define fecha y hora de vencimiento (Opcional)</label>
+          <div class="input-row">
+              <input type="date" id="dateInput" aria-label="Seleccionar fecha de vencimiento" title="Fecha de Vencimiento">
+              <input type="time" id="timeInput" aria-label="Seleccionar hora de vencimiento" title="Hora de Vencimiento">
+          </div>
+      </div>
+      
       <select id="prioritySelect" aria-label="Seleccionar prioridad de la tarea">
         <option value="" disabled selected>Elige la prioridad</option>
         <option value="low">Baja</option>
@@ -103,5 +111,21 @@
   </div>
 
   <script src="scripts.js"></script>
+  
+  <div id="recovery-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="recovery-title" hidden>
+    <div class="modal-content">
+        <h3 id="recovery-title">Tarea No Completada/Vencida</h3>
+        <p>Parece que esta tarea no se completó a tiempo. Por favor, justifica el motivo o reasígnala.</p>
+        
+        <form id="recovery-form">
+            <textarea id="failure-reason" placeholder="Motivo por el que no se completó (Opcional)" rows="3"></textarea>
+            
+            <div class="modal-actions">
+                <button type="button" id="confirm-reason-btn" class="survey-btn danger-btn">Registrar Motivo y Archivar</button>
+                <button type="button" id="reassign-task-btn" class="survey-btn">Reasignar Tarea</button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
