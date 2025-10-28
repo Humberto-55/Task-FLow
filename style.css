@@ -90,6 +90,7 @@ header {
 /* --- Campo de Entrada de Tarea (Input) --- */
 .task-input-container {
   display: flex;
+  flex-wrap: wrap; 
   gap: 10px;
   margin-top: 20px;
   margin-bottom: 30px;
@@ -106,31 +107,61 @@ header {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.task-input-container input {
+.task-input-container input[type="text"] {
   flex-grow: 1; 
-  padding-left: 18px;
+  width: 100%; 
+  order: 1;
+}
+
+/* --- Estilos para la Nueva Leyenda de Fecha y Hora --- */
+.date-time-group {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    order: 2; 
+    min-width: 100%; 
+}
+
+.date-time-label {
+    font-size: 0.8em;
+    color: var(--text-color);
+    margin-bottom: 5px;
+    font-weight: bold;
+    opacity: 0.8;
+}
+
+.task-input-container .input-row {
+    display: flex;
+    gap: 10px;
+}
+
+.task-input-container input[type="date"],
+.task-input-container input[type="time"] {
+    flex-grow: 1;
+    min-width: unset;
+    padding: 12px;
+    border-radius: 25px; 
+    border: 1px solid #ced4da;
+    font-size: 1em;
+    background-color: var(--bg-card);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .task-input-container select {
-    min-width: 130px;
+    order: 3;
+    min-width: 150px;
 }
-
-.task-input-container select option[value=""][disabled] {
-    color: #999;
-}
-.task-input-container select:invalid {
-    color: #999;
-}
-
 .task-input-container button {
-  padding: 12px 15px;
-  border-radius: 25px;
-  border: none;
-  background-color: var(--secondary-color);
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s;
+    order: 4;
+    min-width: 120px;
+    padding: 12px 15px;
+    border-radius: 25px;
+    border: none;
+    background-color: var(--secondary-color);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 .task-input-container button:hover {
@@ -236,21 +267,31 @@ header {
   background-color: #f7f7f7;
 }
 
-.task-list li span {
-    flex-grow: 1; 
+/* Contenedor de texto y fecha */
+.task-list li .task-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
     padding-right: 15px;
-    word-break: break-word; 
 }
 
-/* Estilo de la barra de prioridad */
-.task-list li.low { border-left: 5px solid var(--success-color); }
-.task-list li.medium { border-left: 5px solid #FFC107; }
-.task-list li.high { border-left: 5px solid var(--danger-color); }
+.task-list li .task-content-wrapper span {
+    font-weight: bold;
+    padding-right: 0; 
+}
+
+.task-list li .task-content-wrapper small {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 2px;
+    /* CORRECCIÓN DE AMONTONAMIENTO: Permite saltos de línea donde se inyecta <br> */
+    white-space: pre-wrap; 
+}
 
 /* Indicador de Tarea Favorita (Borde alrededor) */
 .task-list li.favorite {
     border: 2px solid var(--favorite-color); 
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.2); 
+    box-shadow: 0 0 10px rgba(245, 210, 10, 0.2); 
 }
 
 /* --- Estados de Tarea --- */
@@ -303,7 +344,8 @@ header {
 /* --- Botones de Acción (Tooltips) --- */
 .action-buttons {
     display: flex;
-    gap: 5px;
+    gap: 8px; /* Separación aumentada */
+    align-items: center;
 }
 .action-buttons button {
     background: none;
@@ -341,7 +383,7 @@ header {
 }
 
 /* Botón Favorito */
-button.favorite-btn { color: #FFD700; font-size: 1.3em;}
+button.favorite-btn { color: #ffda06; font-size: 1.3em;} /* No favorito es gris */
 .task-list li.favorite button.favorite-btn { color: var(--favorite-color);}
 button.edit-btn { color: var(--secondary-color); }
 button.delete-btn { color: var(--danger-color); }
@@ -367,16 +409,15 @@ body.high-contrast {
   background-color: var(--bg-light);
   color: var(--text-color);
 }
-/* Estilos específicos de alto contraste */
 body.high-contrast .task-list li, body.high-contrast .modal-content {
   border: 1px solid #444; 
 }
 body.high-contrast .task-list li.failed { background-color: #330000; }
+body.high-contrast .task-list li.favorite button.favorite-btn { color: var(--favorite-color);}
 
 
 /* --- MODO DALTONISMO (Dichromacy - Protanopia/Deuteranopia) --- */
 body.daltonism-mode {
-    /* FONDO LIGERAMENTE GRIS PARA DISTINGUIRSE DEL MODO LUZ AZULADO */
     --bg-light: #F0F0F0; 
     background-color: var(--bg-light); 
     
