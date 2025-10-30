@@ -26,36 +26,55 @@ const closeWelcomeBtn = document.getElementById('close-welcome-btn');
 const linkDudas = document.getElementById('link-dudas');
 const linkTecnico = document.getElementById('link-tecnico');
 
-// NUEVOS ELEMENTOS DEL MODAL DE RECUPERACIÓN
+// Modal de recuperación
 const recoveryModal = document.getElementById('recovery-modal');
 const failureReasonInput = document.getElementById('failure-reason');
 const confirmReasonBtn = document.getElementById('confirm-reason-btn');
 const reassignTaskBtn = document.getElementById('reassign-task-btn');
-let currentFailedTaskElement = null; // Para guardar la tarea sobre la que se hizo clic
+let currentFailedTaskElement = null;
+
+// Modal de Reflexión
+const reflectionModal = document.getElementById('reflection-modal');
+const reflectionText = document.getElementById('reflection-text');
+const confirmReflectionBtn = document.getElementById('confirm-reflection-btn');
+const closeReflectionBtn = document.getElementById('close-reflection-btn');
+let currentCompletedTaskElement = null;
+
+// Contador de Tareas
+const pendingCountEl = document.getElementById('pending-count');
+const completedCountEl = document.getElementById('completed-count');
+const failedCountEl = document.getElementById('failed-count');
+
+// Sección de Reflexiones
+const completedReflectionsList = document.getElementById('completed-reflections-list');
+const failedReflectionsList = document.getElementById('failed-reflections-list');
 
 
-// Inicializar la aplicación
 document.addEventListener('DOMContentLoaded', () => {
     setupFormLinks();
     loadTasks();
-    showWelcomeModal(); 
-    setInterval(checkTaskDeadlines, 60000); // Verifica cada minuto
+    loadReflections();
+    showWelcomeModal();
+    setupReflectionModalListeners();
+    setInterval(checkTaskDeadlines, 60000);
 });
 
-// Eventos de Tareas (se mantienen)
 addTaskBtn.addEventListener('click', addTask);
-taskInput.addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') addTask();
-});
+taskInput.addEventListener('keypress', e => { if (e.key === 'Enter') addTask(); });
+
 contrastToggle.addEventListener('click', () => {
   document.body.classList.toggle('high-contrast');
   localStorage.setItem('highContrastMode', document.body.classList.contains('high-contrast'));
 });
+
 daltonismToggle.addEventListener('click', () => {
-    document.body.classList.toggle('daltonism-mode');
-    localStorage.setItem('daltonismMode', document.body.classList.contains('daltonism-mode'));
+  document.body.classList.toggle('daltonism-mode');
+  localStorage.setItem('daltonismMode', document.body.classList.contains('daltonism-mode'));
 });
-// (Resto de la lógica de modales de ayuda y setupFormLinks se mantiene...)
+
+// ===============================
+// 2. MODALES DE AYUDA Y BIENVENIDA
+// ===============================
 function setupFormLinks() {
     const URL_DUDAS = "https://forms.gle/VWrE8LM4ZcWuhyjE7";
     const URL_TECNICO = "https://forms.gle/p99c2zg594rTzick6";
@@ -64,463 +83,595 @@ function setupFormLinks() {
 }
 
 helpBtn.addEventListener('click', () => {
-    helpModal.classList.add('visible'); helpModal.removeAttribute('hidden'); closeModalBtn.focus(); 
+  helpModal.classList.add('visible');
+  helpModal.removeAttribute('hidden');
+  closeModalBtn.focus();
 });
 closeModalBtn.addEventListener('click', () => {
-    helpModal.classList.remove('visible'); helpModal.setAttribute('hidden', ''); helpBtn.focus();
+  helpModal.classList.remove('visible');
+  helpModal.setAttribute('hidden', '');
+  helpBtn.focus();
 });
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
-        helpModal.classList.remove('visible'); helpModal.setAttribute('hidden', ''); helpBtn.focus();
-    }
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && helpModal.classList.contains('visible')) {
+    helpModal.classList.remove('visible');
+    helpModal.setAttribute('hidden', '');
+    helpBtn.focus();
+  }
 });
+
 function showWelcomeModal() {
-    const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
-    if (hasSeenWelcome) return;
     welcomeModal.classList.add('visible');
     welcomeModal.removeAttribute('hidden');
     closeWelcomeBtn.addEventListener('click', () => {
         welcomeModal.classList.remove('visible');
         welcomeModal.setAttribute('hidden', '');
-        localStorage.setItem('hasSeenWelcome', 'true'); 
         taskInput.focus();
     });
 }
 
+// ===============================
+// 2.1 NOTIFICACIÓN TOAST
+// ===============================
+function showToast(message, type = 'success') {
+  const existingToast = document.querySelector('.toast-notification');
+  if (existingToast) existingToast.remove();
+  const toast = document.createElement('div');
+  toast.className = `toast-notification ${type}`;
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 10);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.addEventListener('transitionend', () => {
+      if (toast.parentNode) toast.parentNode.removeChild(toast);
+    });
+  }, 3000);
+}
 
-// ===================================
-// 3. LÓGICA DE RECUPERACIÓN DE TAREAS
-// ===================================
 
-/**
- * Muestra el modal de recuperación y guarda la referencia de la tarea.
- */
+// ===============================
+// 3. RECUPERACIÓN Y REFLEXIÓN
+// ===============================
+
+// --- Modal de Tareas Fallidas ---
 function handleFailedTaskClick(li) {
-    if (!li.classList.contains('failed')) return; // Solo funciona en tareas fallidas
-    
-    currentFailedTaskElement = li;
-    recoveryModal.classList.add('visible');
-    recoveryModal.removeAttribute('hidden');
-    failureReasonInput.value = ''; // Limpiar el input
-
-    // Ocultar modal de ayuda si estaba abierto
-    helpModal.classList.remove('visible');
-    helpModal.setAttribute('hidden', '');
+  if (!li.classList.contains('failed')) return;
+  currentFailedTaskElement = li;
+  recoveryModal.classList.add('visible');
+  recoveryModal.removeAttribute('hidden');
+  failureReasonInput.value = '';
+  failureReasonInput.focus();
 }
 
-/**
- * Lógica para REASIGNAR la tarea
- */
 reassignTaskBtn.addEventListener('click', () => {
-    if (!currentFailedTaskElement) return;
-
-    // Abrir el modal de edición con la información actual
-    const taskTextSpan = currentFailedTaskElement.querySelector('span');
-    const newText = prompt('Reasigna la tarea - Nuevo texto:', taskTextSpan.textContent);
-    const newDate = prompt('Reasigna la tarea - Nueva fecha (YYYY-MM-DD):', currentFailedTaskElement.dataset.date);
-    const newTime = prompt('Reasigna la tarea - Nueva hora (HH:MM):', currentFailedTaskElement.dataset.time);
-
-    if (newText !== null && newText.trim() !== '') {
-        // 1. Actualizar datos
-        taskTextSpan.textContent = newText.trim();
-        currentFailedTaskElement.dataset.date = newDate || '';
-        currentFailedTaskElement.dataset.time = newTime || '';
-        
-        // 2. Mover de Fallida a Pendiente (Alta/Media/Baja)
-        currentFailedTaskElement.classList.remove('failed');
-        currentFailedTaskElement.querySelector('.status-btn').textContent = '⬜';
-
-        // 3. Actualizar la visualización de la fecha
-        const dateDisplay = currentFailedTaskElement.querySelector('.date-display');
-        let nuevoVencimientoTexto = 'Sin fecha';
-        if (newDate) {
-            nuevoVencimientoTexto = `Vence: ${new Date(newDate).toLocaleDateString()}`;
-            if (newTime) {
-                nuevoVencimientoTexto += `<br>Hora: ${newTime}`; // CAMBIO: Usar <br>
-            }
-        }
-        dateDisplay.innerHTML = nuevoVencimientoTexto; // CAMBIO: Usar innerHTML
-
-        // Mover y guardar
-        getTargetList(currentFailedTaskElement).appendChild(currentFailedTaskElement);
-        reorderList(getTargetList(currentFailedTaskElement));
-        reorderList(failedTasksList); 
-        saveTasks();
-    }
-    
-    // Cerrar modal
-    recoveryModal.classList.remove('visible');
-    recoveryModal.setAttribute('hidden', '');
-    currentFailedTaskElement = null;
+  if (!currentFailedTaskElement) return;
+  const taskTextSpan = currentFailedTaskElement.querySelector('span');
+  const newText = prompt('Reasigna la tarea - Nuevo texto:', taskTextSpan.dataset.originalText);
+  const newDate = prompt('Reasigna la tarea - Nueva fecha (YYYY-MM-DD):', currentFailedTaskElement.dataset.date);
+  const newTime = prompt('Reasigna la tarea - Nueva hora (HH:MM):', currentFailedTaskElement.dataset.time);
+  
+  if (newText !== null && newText.trim() !== '') {
+      taskTextSpan.textContent = newText.trim();
+      taskTextSpan.dataset.originalText = newText.trim();
+      currentFailedTaskElement.dataset.date = newDate || '';
+      currentFailedTaskElement.dataset.time = newTime || '';
+      
+      const dateDisplay = currentFailedTaskElement.querySelector('.date-display');
+      let nuevoVencimientoTexto = 'Sin fecha';
+      if (newDate) {
+          nuevoVencimientoTexto = ` Vence: ${new Date(newDate).toLocaleDateString()}`;
+          if (newTime) nuevoVencimientoTexto += `<br>Hora: ${newTime}`;
+      }
+      dateDisplay.innerHTML = nuevoVencimientoTexto;
+      
+      currentFailedTaskElement.classList.remove('failed');
+      currentFailedTaskElement.querySelector('.status-btn').textContent = '⬜';
+      // Mover el botón de plan/reflexión
+      currentFailedTaskElement.querySelector('.plan-btn')?.remove();
+      getTargetList(currentFailedTaskElement).appendChild(currentFailedTaskElement);
+      reorderList(getTargetList(currentFailedTaskElement));
+      saveTasks();
+  }
+  recoveryModal.classList.remove('visible');
+  recoveryModal.setAttribute('hidden', '');
+  currentFailedTaskElement = null;
 });
 
-/**
- * Lógica para ARCHIVAR la tarea (Simplemente la eliminamos si es vencida o fallida)
- */
 confirmReasonBtn.addEventListener('click', () => {
-    if (!currentFailedTaskElement) return;
+  if (!currentFailedTaskElement) return;
+  const reason = failureReasonInput.value.trim();
+  const taskText = currentFailedTaskElement.querySelector('span').dataset.originalText;
 
-    const reason = failureReasonInput.value.trim();
-    const taskName = currentFailedTaskElement.querySelector('span').textContent;
-    
-    if (reason) {
-        console.log(`TAREA ARCHIVADA: ${taskName}. Motivo: ${reason}`);
-        alert(`Motivo '${reason}' registrado. Tarea archivada.`);
-    } else {
-        alert('Tarea archivada sin motivo.');
-    }
-    
-    // Eliminar la tarea y guardar
-    currentFailedTaskElement.remove();
-    saveTasks();
-    
-    // Cerrar modal
-    recoveryModal.classList.remove('visible');
-    recoveryModal.setAttribute('hidden', '');
-    currentFailedTaskElement = null;
+  if (reason) {
+      saveReflection(taskText, reason, 'failed');
+      alert(`Plan de acción '${reason}' registrado. Tarea archivada.`);
+  } else {
+      alert('Tarea archivada sin plan.');
+  }
+  
+  currentFailedTaskElement.remove();
+  saveTasks();
+  recoveryModal.classList.remove('visible');
+  recoveryModal.setAttribute('hidden', '');
+  currentFailedTaskElement = null;
 });
 
-
-// ===================================
-// 4. LÓGICA DE TAREAS Y MOVIMIENTO
-// ===================================
-
-/**
- * Verifica si una tarea ha vencido y la mueve si es necesario. (Se mantiene)
- */
-function checkTaskDeadlines() {
-    const activeLists = [favoriteTasksList, highPriorityList, mediumPriorityList, lowPriorityList];
-    
-    activeLists.forEach(ulElement => {
-        ulElement.querySelectorAll('li').forEach(li => {
-            const date = li.dataset.date;
-            const time = li.dataset.time;
-            
-            if (date) {
-                const deadline = new Date(`${date}T${time || '23:59:59'}`);
-                const now = new Date();
-                
-                if (deadline < now) {
-                    if (!li.classList.contains('completed') && !li.classList.contains('failed')) {
-                        
-                        li.classList.remove('favorite');
-                        li.classList.add('failed'); 
-                        
-                        const statusBtn = li.querySelector('.status-btn');
-                        if (statusBtn) statusBtn.textContent = '❌'; 
-                        
-                        failedTasksList.appendChild(li);
-                        
-                        reorderList(failedTasksList);
-                        reorderList(ulElement);
-                        saveTasks();
-                        console.log(`Tarea vencida movida: ${li.querySelector('span').textContent}`);
-                    }
-                }
-            }
-        });
-    });
-}
-
-
-/**
- * Retorna el contenedor UL correcto basado en el estado y prioridad. (Se mantiene)
- */
-function getTargetList(li) {
-    const isCompleted = li.classList.contains('completed');
-    const isFailed = li.classList.contains('failed');
-    const isFavorite = li.classList.contains('favorite');
-
-    if (isCompleted) return completedTasksList; 
-    if (isFailed) return failedTasksList; 
-    
-    if (isFavorite) return favoriteTasksList; 
-    
-    if (li.classList.contains('high')) return highPriorityList;
-    if (li.classList.contains('medium')) return mediumPriorityList;
-    if (li.classList.contains('low')) return lowPriorityList;
-
-    return lowPriorityList; 
-}
-
-/**
- * Función que ordena la lista localmente (Favoritos primero) (Se mantiene)
- */
-function reorderList(ulElement) {
-    const tasks = Array.from(ulElement.querySelectorAll('li'));
-    
-    tasks.sort((a, b) => {
-        const aIsFavorite = a.classList.contains('favorite');
-        const bIsFavorite = b.classList.contains('favorite');
-        
-        if (aIsFavorite !== bIsFavorite) {
-            return aIsFavorite ? -1 : 1; 
+// --- Modal de Reflexión de Tarea Completada ---
+function setupReflectionModalListeners() {
+    confirmReflectionBtn.addEventListener('click', () => {
+        const reflection = reflectionText.value.trim();
+        if (reflection && currentCompletedTaskElement) {
+            const taskText = currentCompletedTaskElement.querySelector('span').dataset.originalText;
+            saveReflection(taskText, reflection, 'completed');
+            alert(`Reflexión guardada: '${reflection}'`);
         }
-        return 0; 
+        reflectionModal.classList.remove('visible');
+        reflectionModal.setAttribute('hidden', '');
+        currentCompletedTaskElement = null;
     });
-    tasks.forEach(task => ulElement.appendChild(task));
+
+    closeReflectionBtn.addEventListener('click', () => {
+        reflectionModal.classList.remove('visible');
+        reflectionModal.setAttribute('hidden', '');
+        currentCompletedTaskElement = null;
+    });
 }
 
-
-/**
- * Función que alterna el estado de la tarea y MUEVE el elemento si es necesario.
- */
-function toggleTaskStatus(li) {
-    let newStatusIcon;
-    const currentList = li.parentElement;
-    
-    if (li.classList.contains('completed')) {
-        li.classList.remove('completed');
-        li.classList.add('failed');
-        newStatusIcon = '❌';
-    } else if (li.classList.contains('failed')) {
-        li.classList.remove('failed');
-        newStatusIcon = '⬜';
-    } else {
-        li.classList.add('completed');
-        newStatusIcon = '✅';
-    }
-    
-    const targetList = getTargetList(li);
-    if (currentList !== targetList) {
-        targetList.appendChild(li);
-    }
-    
-    reorderList(targetList);
-    if (currentList && currentList !== targetList) {
-        reorderList(currentList); 
-    }
-
-    return newStatusIcon;
+function handleCompletedTaskClick(li) {
+  currentCompletedTaskElement = li;
+  reflectionModal.classList.add('visible');
+  reflectionModal.removeAttribute('hidden');
+  reflectionText.value = '';
+  reflectionText.focus();
 }
 
+// ===============================
+// 4. FUNCIONES DE TAREAS Y REFLEXIONES
+// ===============================
 
-/**
- * Crea la estructura LI para una tarea...
- */
-function createTaskElement(text, priority, completed, favorite = false, failed = false, date = '', time = '') { 
+// --- Contador de Tareas ---
+function updateTaskCount() {
+    const pending = document.querySelectorAll('#favorite-tasks-list li, #high-priority-list li, #medium-priority-list li, #low-priority-list li').length;
+    const completed = completedTasksList.getElementsByTagName('li').length;
+    const failed = failedTasksList.getElementsByTagName('li').length;
+    pendingCountEl.textContent = pending;
+    completedCountEl.textContent = completed;
+    failedCountEl.textContent = failed;
+}
+
+// --- Guardar Reflexión ---
+function saveReflection(taskText, reflectionText, status) {
+    const reflections = JSON.parse(localStorage.getItem('reflections') || '[]');
+    const newReflection = {
+        id: Date.now().toString(),
+        taskText: taskText,
+        text: reflectionText,
+        status: status,
+        timestamp: new Date().toISOString()
+    };
+    reflections.push(newReflection);
+    localStorage.setItem('reflections', JSON.stringify(reflections));
+    loadReflections();
+}
+
+// --- Cargar Reflexiones ---
+function loadReflections() {
+    const reflections = JSON.parse(localStorage.getItem('reflections') || '[]');
+    completedReflectionsList.innerHTML = '';
+    failedReflectionsList.innerHTML = '';
+
+    reflections.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
+
+    reflections.forEach(reflection => {
+        const li = createReflectionElement(reflection);
+        if (reflection.status === 'completed') {
+            completedReflectionsList.appendChild(li);
+        } else {
+            failedReflectionsList.appendChild(li);
+        }
+    });
+}
+
+// --- Crear Elemento de Reflexión ---
+function createReflectionElement(reflection) {
     const li = document.createElement('li');
-    li.classList.add(priority);
-    if (completed) li.classList.add('completed');
-    if (failed) li.classList.add('failed');
-    if (favorite) li.classList.add('favorite');
+    li.className = 'reflection-item';
+    li.dataset.id = reflection.id;
 
-    const taskContent = document.createElement('div');
-    taskContent.classList.add('task-content-wrapper');
+    const text = document.createElement('p');
+    text.className = 'reflection-text';
+    text.textContent = reflection.text;
 
-    const span = document.createElement('span');
-    span.textContent = text;
-    
-    // --- FECHA Y HORA ---
-    const dateDisplay = document.createElement('small');
-    dateDisplay.classList.add('date-display');
-    
-    let vencimientoTexto = 'Sin fecha';
-    if (date) {
-        vencimientoTexto = ` Vence: ${new Date(date).toLocaleDateString()}`;
-        if (time) {
-            vencimientoTexto += `<br>Hora: ${time}`; // CAMBIO: Usar <br>
-        }
-    }
-    dateDisplay.innerHTML = vencimientoTexto; // CAMBIO: Usar innerHTML
+    const meta = document.createElement('div');
+    meta.className = 'reflection-meta';
 
-    taskContent.appendChild(span);
-    taskContent.appendChild(dateDisplay);
-    
-    // --- BOTÓN DE ESTADO ---
-    const statusBtn = document.createElement('button');
-    statusBtn.classList.add('status-btn');
-    statusBtn.setAttribute('aria-label', 'Marcar estado de tarea');
-    statusBtn.setAttribute('title', 'Marcar tarea como completada, fallida o pendiente');
-    statusBtn.setAttribute('data-tooltip', 'Marcar tarea como completada, fallida o pendiente');
-    
-    if (completed) { statusBtn.textContent = '✅'; } 
-    else if (failed) { statusBtn.textContent = '❌'; } 
-    else { statusBtn.textContent = '⬜'; }
+    const task = document.createElement('span');
+    task.className = 'reflection-task';
+    task.textContent = `Tarea: ${reflection.taskText}`;
 
-    statusBtn.addEventListener('click', () => {
-        statusBtn.textContent = toggleTaskStatus(li);
-        saveTasks();
-    });
+    const date = document.createElement('span');
+    date.className = 'reflection-date';
+    date.textContent = new Date(reflection.timestamp).toLocaleDateString();
 
-    // Permitir clic en la tarea fallida para abrir el modal de justificación
-    if (failed) {
-        li.addEventListener('click', (e) => {
-            // Asegurar que el clic no fue en un botón de acción
-            if (!e.target.closest('.action-buttons')) {
-                handleFailedTaskClick(li);
-            }
-        });
-    }
-
-    const actionButtons = document.createElement('div');
-    actionButtons.classList.add('action-buttons');
-    
-    // Botón Favorito (se mantiene)
-    const favoriteBtn = document.createElement('button');
-    favoriteBtn.textContent = favorite ? '★' : '☆'; 
-    favoriteBtn.classList.add('favorite-btn');
-    favoriteBtn.setAttribute('aria-label', 'Marcar o desmarcar como favorita');
-    favoriteBtn.setAttribute('title', 'Marcar/Desmarcar como favorito'); 
-    favoriteBtn.setAttribute('data-tooltip', 'Marcar/Desmarcar como favorito'); 
-
-    favoriteBtn.addEventListener('click', () => {
-        const currentList = li.parentElement;
-        li.classList.toggle('favorite');
-        favoriteBtn.textContent = li.classList.contains('favorite') ? '★' : '☆'; 
-        
-        if (!li.classList.contains('completed') && !li.classList.contains('failed')) {
-             const targetList = getTargetList(li);
-             if (currentList !== targetList) {
-                 targetList.appendChild(li);
-             }
-        }
-        
-        if (currentList) { reorderList(currentList); }
-        saveTasks();
-    });
-
-    // Botón Editar (se mantiene)
-    const editBtn = document.createElement('button');
-    editBtn.textContent = '✏️';
-    editBtn.classList.add('edit-btn');
-    editBtn.setAttribute('aria-label', 'Editar tarea');
-    editBtn.setAttribute('title', 'Editar tarea'); 
-    editBtn.setAttribute('data-tooltip', 'Editar tarea'); 
-    
-    editBtn.addEventListener('click', () => {
-        const newText = prompt('Editar texto de la tarea:', span.textContent);
-        const newDate = prompt('Editar fecha (YYYY-MM-DD), deje vacío para borrar:', date);
-        const newTime = prompt('Editar hora (HH:MM), deje vacío para borrar:', time); 
-
-        if (newText !== null && newText.trim() !== '') {
-            span.textContent = newText.trim();
-        }
-        
-        li.dataset.date = newDate || '';
-        li.dataset.time = newTime || '';
-
-        let nuevoVencimientoTexto = 'Sin fecha';
-        if (newDate) {
-            nuevoVencimientoTexto = `Vence: ${new Date(newDate).toLocaleDateString()}`;
-            if (newTime) {
-                nuevoVencimientoTexto += `<br>Hora: ${newTime}`;
-            }
-        }
-        dateDisplay.innerHTML = nuevoVencimientoTexto;
-
-        saveTasks();
-    });
-
-    // Botón eliminar (se mantiene)
     const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-reflection-btn';
     deleteBtn.textContent = '🗑';
-    deleteBtn.classList.add('delete-btn');
-    deleteBtn.setAttribute('aria-label', 'Eliminar tarea');
-    deleteBtn.setAttribute('title', 'Eliminar tarea'); 
-    deleteBtn.setAttribute('data-tooltip', 'Eliminar tarea'); 
-
+    deleteBtn.setAttribute('aria-label', 'Eliminar esta reflexión');
     deleteBtn.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-            li.remove();
-            saveTasks(); 
+        if (confirm('¿Estás seguro de eliminar esta reflexión? No se puede deshacer.')) {
+            deleteReflection(reflection.id);
         }
     });
-
-    // Ensamblaje
-    li.appendChild(statusBtn); 
-    li.appendChild(taskContent); 
-    actionButtons.appendChild(favoriteBtn);
-    actionButtons.appendChild(editBtn);
-    actionButtons.appendChild(deleteBtn);
-    li.appendChild(actionButtons);
     
-    li.dataset.date = date;
-    li.dataset.time = time;
-    
+    meta.append(task, date, deleteBtn);
+    li.append(text, meta);
     return li;
 }
 
-/**
- * Añade una nueva tarea, FECHA, HORA, y la pone en su sección de prioridad. (Se mantiene)
- */
+// --- Eliminar Reflexión ---
+function deleteReflection(id) {
+    let reflections = JSON.parse(localStorage.getItem('reflections') || '[]');
+    reflections = reflections.filter(r => r.id !== id);
+    localStorage.setItem('reflections', JSON.stringify(reflections));
+    loadReflections();
+}
+
+
+function checkTaskDeadlines() {
+  [favoriteTasksList, highPriorityList, mediumPriorityList, lowPriorityList].forEach(ul => {
+      ul.querySelectorAll('li').forEach(li => {
+          const date = li.dataset.date, time = li.dataset.time;
+          if (date) {
+              const deadline = new Date(`${date}T${time || '23:59:59'}`);
+              if (deadline < new Date() && !li.classList.contains('completed') && !li.classList.contains('failed')) {
+                  li.classList.remove('favorite');
+                  li.classList.add('failed');
+                  li.querySelector('.status-btn').textContent = '❌';
+                  
+                  // (MODIFICADO) Añadir botón de plan de acción
+                  const actionButtons = li.querySelector('.action-buttons');
+                  const reflectionPlanBtn = actionButtons.querySelector('.reflection-btn, .plan-btn') || document.createElement('button');
+                  
+                  reflectionPlanBtn.textContent = '📝';
+                  reflectionPlanBtn.className = 'plan-btn';
+                  reflectionPlanBtn.setAttribute('data-tooltip', 'Añadir plan de acción');
+                  reflectionPlanBtn.setAttribute('aria-label', 'Añadir plan de acción');
+                  reflectionPlanBtn.onclick = (e) => { e.stopPropagation(); handleFailedTaskClick(li); };
+                  if (!actionButtons.contains(reflectionPlanBtn)) {
+                      actionButtons.appendChild(reflectionPlanBtn);
+                  }
+                  
+                  failedTasksList.appendChild(li);
+                  reorderList(failedTasksList);
+                  saveTasks();
+              }
+          }
+      });
+  });
+}
+
+function getTargetList(li) {
+  if (li.classList.contains('completed')) return completedTasksList;
+  if (li.classList.contains('failed')) return failedTasksList;
+  if (li.classList.contains('favorite')) return favoriteTasksList;
+  if (li.classList.contains('high')) return highPriorityList;
+  if (li.classList.contains('medium')) return mediumPriorityList;
+  return lowPriorityList;
+}
+
+function reorderList(ulElement) {
+  const tasks = Array.from(ulElement.querySelectorAll('li'));
+  tasks.sort((a, b) => b.classList.contains('favorite') - a.classList.contains('favorite'));
+  tasks.forEach(task => ulElement.appendChild(task));
+}
+
 function addTask() {
-    const taskText = taskInput.value.trim();
-    const selectedPriority = prioritySelect.value;
-    const selectedDate = dateInput.value; 
-    const selectedTime = timeInput.value; 
-    
-    if (taskText === '' || selectedPriority === '') {
-        alert('Por favor, escribe la tarea y elige una prioridad válida.');
-        return;
-    }
-
-    const newTask = createTaskElement(taskText, selectedPriority, false, false, false, selectedDate, selectedTime); 
-    
-    const targetList = getTargetList(newTask);
-    targetList.appendChild(newTask);
-    
-    reorderList(targetList);
-
-    taskInput.value = '';
-    dateInput.value = ''; 
-    timeInput.value = ''; 
-    prioritySelect.value = ''; 
-    taskInput.focus();
-    
-    saveTasks(); 
+  const text = taskInput.value.trim();
+  const priority = prioritySelect.value;
+  const date = dateInput.value, time = timeInput.value;
+  if (!text || !priority) return alert('Por favor, escribe la tarea y elige una prioridad válida.');
+  const li = createTaskElement(text, priority, false, false, false, date, time);
+  getTargetList(li).appendChild(li);
+  reorderList(getTargetList(li));
+  [taskInput, dateInput, timeInput, prioritySelect].forEach(i => i.value = '');
+  taskInput.focus();
+  saveTasks();
 }
 
-/**
- * Guarda las tareas en LocalStorage (Persistencia). Incluye la fecha y hora. (Se mantiene)
- */
 function saveTasks() {
-    const tasks = [];
-    document.querySelectorAll('.task-group li').forEach(li => {
-        const text = li.querySelector('span').textContent;
-        const completed = li.classList.contains('completed');
-        const failed = li.classList.contains('failed');
-        const favorite = li.classList.contains('favorite');
-        const date = li.dataset.date || ''; 
-        const time = li.dataset.time || '';
-        
-        let priority = 'low'; 
-        if (li.classList.contains('medium')) priority = 'medium';
-        if (li.classList.contains('high')) priority = 'high';
+  const tasks = [];
+  document.querySelectorAll('.task-group li').forEach(li => {
+      const textSpan = li.querySelector('span');
+      let originalText = textSpan.dataset.originalText || textSpan.textContent.split(' — Prioridad ')[0];
+      textSpan.dataset.originalText = originalText;
 
-        tasks.push({ text, completed, failed, priority, favorite, date, time }); 
-    });
-    localStorage.setItem('tasks', JSON.stringify(tasks));
+      tasks.push({
+          text: originalText,
+          completed: li.classList.contains('completed'),
+          failed: li.classList.contains('failed'),
+          favorite: li.classList.contains('favorite'),
+          priority: li.classList.contains('high') ? 'high' : li.classList.contains('medium') ? 'medium' : 'low',
+          date: li.dataset.date || '',
+          time: li.dataset.time || ''
+      });
+  });
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+  updateTaskCount();
 }
 
-/**
- * Carga las tareas desde LocalStorage al iniciar y las distribuye. (Se mantiene)
- */
 function loadTasks() {
-    const isHighContrast = localStorage.getItem('highContrastMode') === 'true';
-    if (isHighContrast) { document.body.classList.add('high-contrast'); }
-    
-    const isDaltonismMode = localStorage.getItem('daltonismMode') === 'true';
-    if (isDaltonismMode) { document.body.classList.add('daltonism-mode'); } 
-    
-    const storedTasks = localStorage.getItem('tasks');
-    if (storedTasks) {
-        const tasks = JSON.parse(storedTasks);
-        tasks.forEach(task => {
-            const taskElement = createTaskElement(task.text, task.priority, task.completed, task.favorite, task.failed, task.date, task.time);
-            const targetList = getTargetList(taskElement); 
-            targetList.appendChild(taskElement);
-        });
-        
-        reorderList(favoriteTasksList);
-        reorderList(highPriorityList);
-        reorderList(mediumPriorityList);
-        reorderList(lowPriorityList);
-        reorderList(completedTasksList);
-        reorderList(failedTasksList);
-        
-        checkTaskDeadlines();
+  if (localStorage.getItem('highContrastMode') === 'true') document.body.classList.add('high-contrast');
+  if (localStorage.getItem('daltonismMode') === 'true') document.body.classList.add('daltonism-mode');
+  const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+  storedTasks.forEach(t => {
+      const el = createTaskElement(t.text, t.priority, t.completed, t.favorite, t.failed, t.date, t.time);
+      getTargetList(el).appendChild(el);
+  });
+  [favoriteTasksList, highPriorityList, mediumPriorityList, lowPriorityList, completedTasksList, failedTasksList].forEach(reorderList);
+  checkTaskDeadlines();
+  updateTaskCount();
+}
+
+// ===============================
+// 5. CREACIÓN DE TAREAS (PRINCIPAL) - VERSIÓN ACTUALIZADA
+// ===============================
+function createTaskElement(text, priority, completed, favorite = false, failed = false, date = '', time = '') {
+  const li = document.createElement('li');
+  li.classList.add(priority);
+  if (completed) li.classList.add('completed');
+  if (failed) li.classList.add('failed');
+  if (favorite) li.classList.add('favorite');
+
+  const taskContent = document.createElement('div');
+  taskContent.classList.add('task-content-wrapper');
+
+  const span = document.createElement('span');
+  span.dataset.originalText = text; 
+  span.textContent = favorite ? `${text} — Prioridad ${priorityName(priority)}` : text;
+
+  const dateDisplay = document.createElement('small');
+  dateDisplay.classList.add('date-display');
+  dateDisplay.innerHTML = date ? ` Vence: ${new Date(date).toLocaleDateString()}${time ? `<br>Hora: ${time}` : ''}` : 'Sin fecha';
+
+  taskContent.appendChild(span);
+  taskContent.appendChild(dateDisplay);
+
+  const statusBtn = document.createElement('button');
+  statusBtn.classList.add('status-btn');
+  statusBtn.textContent = completed ? '✅' : failed ? '❌' : '⬜';
+  statusBtn.setAttribute('aria-label', 'Cambiar estado de la tarea');
+  statusBtn.setAttribute('aria-haspopup', 'true');
+  statusBtn.setAttribute('aria-expanded', 'false');
+
+  const statusMenu = document.createElement('div');
+  statusMenu.classList.add('status-menu');
+  statusMenu.setAttribute('role', 'menu');
+
+  const actionButtons = document.createElement('div');
+  actionButtons.classList.add('action-buttons');
+  
+  // (MODIFICADO) Crear el botón de reflexión/plan en este scope
+  const reflectionPlanBtn = document.createElement('button');
+  reflectionPlanBtn.setAttribute('aria-live', 'polite');
+
+  const statusOptions = [
+      ['⬜', 'Marcar como pendiente', 'Marcar tarea como pendiente'],
+      ['✅', 'Marcar como completada', 'Marcar tarea como completada'],
+      ['❌', 'Marcar como no completada', 'Marcar tarea como no completada']
+  ];
+
+  statusOptions.forEach(([icon, text, ariaLabel]) => {
+      const btn = document.createElement('button');
+      btn.textContent = `${icon} ${text}`;
+      btn.setAttribute('aria-label', ariaLabel);
+      btn.setAttribute('role', 'menuitem');
+
+      btn.addEventListener('click', (e) => {
+          e.stopPropagation(); 
+          
+          const wasCompleted = li.classList.contains('completed');
+          const wasFailed = li.classList.contains('failed');
+          
+          li.classList.remove('completed', 'failed');
+          
+          if (icon === '✅') {
+              li.classList.add('completed');
+              if (!wasCompleted) {
+                  const messages = ['¡Excelente!', '¡Un logro más!', '¡Sigue así!', '¡Tarea conquistada!'];
+                  showToast(messages[Math.floor(Math.random() * messages.length)], 'success');
+              }
+              // (MODIFICADO) Configurar y añadir botón de Reflexión
+              reflectionPlanBtn.textContent = '💬';
+              reflectionPlanBtn.className = 'reflection-btn';
+              reflectionPlanBtn.setAttribute('data-tooltip', 'Añadir reflexión de éxito');
+              reflectionPlanBtn.setAttribute('aria-label', 'Añadir reflexión de éxito');
+              reflectionPlanBtn.onclick = (e) => { e.stopPropagation(); handleCompletedTaskClick(li); };
+              if (!actionButtons.contains(reflectionPlanBtn)) {
+                  actionButtons.appendChild(reflectionPlanBtn);
+              }
+
+          } else if (icon === '❌') {
+              li.classList.add('failed');
+              if (!wasFailed) {
+                  const messages = ['¡Ánimo!', 'No te preocupes, ¡tú puedes!', 'A la próxima lo lograrás'];
+                  showToast(messages[Math.floor(Math.random() * messages.length)], 'failed');
+              }
+              // (MODIFICADO) Configurar y añadir botón de Plan de Acción
+              reflectionPlanBtn.textContent = '📝';
+              reflectionPlanBtn.className = 'plan-btn';
+              reflectionPlanBtn.setAttribute('data-tooltip', 'Añadir plan de acción');
+              reflectionPlanBtn.setAttribute('aria-label', 'Añadir plan de acción');
+              reflectionPlanBtn.onclick = (e) => { e.stopPropagation(); handleFailedTaskClick(li); };
+              if (!actionButtons.contains(reflectionPlanBtn)) {
+                  actionButtons.appendChild(reflectionPlanBtn);
+              }
+
+          } else { // '⬜' Pendiente
+              reflectionPlanBtn.remove();
+              if (wasCompleted || wasFailed) {
+                  const messages = ['¡Vamos de nuevo!', '¡Tú puedes con esto!', '¡Un nuevo intento!'];
+                  showToast(messages[Math.floor(Math.random() * messages.length)], 'info');
+              }
+          }
+          
+          statusBtn.textContent = icon;
+          getTargetList(li).appendChild(li);
+          reorderList(getTargetList(li));
+          saveTasks();
+          statusMenu.style.display = 'none';
+          statusBtn.setAttribute('aria-expanded', 'false');
+      });
+      statusMenu.appendChild(btn);
+  });
+
+  statusBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      const isExpanded = statusMenu.style.display === 'block';
+      document.querySelectorAll('.status-menu').forEach(m => m.style.display = 'none');
+      document.querySelectorAll('.status-btn').forEach(b => b.setAttribute('aria-expanded', 'false'));
+      if (!isExpanded) {
+          statusMenu.style.display = 'block';
+          statusBtn.setAttribute('aria-expanded', 'true');
+          const r = statusBtn.getBoundingClientRect();
+          statusMenu.style.top = `${r.bottom + window.scrollY}px`;
+          statusMenu.style.left = `${r.left}px`;
+      } else {
+          statusMenu.style.display = 'none';
+          statusBtn.setAttribute('aria-expanded', 'false');
+      }
+  });
+
+  document.addEventListener('click', e => {
+      if (!statusMenu.contains(e.target) && e.target !== statusBtn) {
+          statusMenu.style.display = 'none';
+          if(statusBtn) statusBtn.setAttribute('aria-expanded', 'false');
+      }
+  });
+  document.body.appendChild(statusMenu);
+
+  // (REMOVIDO) El evento de clic en el 'li' ya no es necesario
+  // if (failed) li.addEventListener('click', ...); 
+
+  const favoriteBtn = document.createElement('button');
+  favoriteBtn.textContent = favorite ? '★' : '☆';
+  favoriteBtn.classList.add('favorite-btn');
+  favoriteBtn.setAttribute('data-tooltip', favorite ? 'Quitar de favoritos' : 'Marcar como favorito');
+  favoriteBtn.setAttribute('aria-label', favorite ? 'Quitar de favoritos' : 'Marcar como favorito');
+  favoriteBtn.addEventListener('click', () => {
+      li.classList.toggle('favorite');
+      const originalText = span.dataset.originalText;
+      span.textContent = li.classList.contains('favorite')
+          ? `${originalText} — Prioridad ${priorityName(priority)}`
+          : originalText;
+      
+      favoriteBtn.textContent = li.classList.contains('favorite') ? '★' : '☆';
+      favoriteBtn.setAttribute('data-tooltip', li.classList.contains('favorite') ? 'Quitar de favoritos' : 'Marcar como favorito');
+      favoriteBtn.setAttribute('aria-label', li.classList.contains('favorite') ? 'Quitar de favoritos' : 'Marcar como favorito');
+      
+      getTargetList(li).appendChild(li);
+      reorderList(getTargetList(li));
+      saveTasks();
+  });
+
+  const editBtn = document.createElement('button');
+  editBtn.textContent = '✏️';
+  editBtn.classList.add('edit-btn');
+  editBtn.setAttribute('data-tooltip', 'Editar tarea');
+  editBtn.setAttribute('aria-label', 'Editar tarea');
+  editBtn.addEventListener('click', () => {
+    let currentText = span.dataset.originalText;
+    const currentPriority = li.classList.contains('high') ? 'high' : li.classList.contains('medium') ? 'medium' : 'low';
+
+    const newText = prompt('Editar texto de la tarea:', currentText);
+    const newDate = prompt('Editar fecha (YYYY-MM-DD):', li.dataset.date || '');
+    const newTime = prompt('Editar hora (HH:MM):', li.dataset.time || '');
+    const newPriority = prompt('Editar prioridad (low, medium, high):', currentPriority);
+
+    if (newText !== null && newText.trim() !== '') {
+        span.dataset.originalText = newText.trim();
+        text = newText.trim();
     }
-    
-    prioritySelect.value = ''; 
+    li.dataset.date = newDate || '';
+    li.dataset.time = newTime || '';
+    if (newPriority && ['low', 'medium', 'high'].includes(newPriority)) {
+        li.classList.remove('low', 'medium', 'high');
+        li.classList.add(newPriority);
+        priority = newPriority;
+    }
+
+    dateDisplay.innerHTML = newDate
+        ? ` Vence: ${new Date(newDate).toLocaleDateString()}${newTime ? `<br>Hora: ${newTime}` : ''}`
+        : 'Sin fecha';
+    span.textContent = li.classList.contains('favorite')
+        ? `${span.dataset.originalText} — Prioridad ${priorityName(priority)}`
+        : span.dataset.originalText;
+
+    if (li.classList.contains('completed') || li.classList.contains('failed')) {
+        if (confirm('¿Deseas marcar esta tarea como pendiente nuevamente?')) {
+            li.classList.remove('completed', 'failed');
+            statusBtn.textContent = '⬜';
+            reflectionPlanBtn.remove(); // (MODIFICADO) Quitar el botón
+            const messages = ['¡Vamos de nuevo!', '¡Tú puedes con esto!', '¡Un nuevo intento!'];
+            showToast(messages[Math.floor(Math.random() * messages.length)], 'info');
+            getTargetList(li).appendChild(li);
+        }
+    } else if (li.classList.contains('favorite')) {
+        if (confirm('¿Deseas mover esta tarea a su prioridad correspondiente?')) {
+            li.classList.remove('favorite');
+            getTargetList(li).appendChild(li);
+        } else {
+            favoriteTasksList.appendChild(li);
+        }
+    } else {
+        getTargetList(li).appendChild(li);
+    }
+
+    reorderList(getTargetList(li));
+    reorderList(favoriteTasksList);
+    saveTasks();
+  });
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.textContent = '🗑';
+  deleteBtn.classList.add('delete-btn');
+  deleteBtn.setAttribute('data-tooltip', 'Eliminar tarea');
+  deleteBtn.setAttribute('aria-label', 'Eliminar tarea');
+  deleteBtn.addEventListener('click', () => {
+      if (confirm('¿Estás seguro de eliminar esta tarea? (Las reflexiones guardadas no se borrarán)')) {
+          li.remove();
+          saveTasks();
+      }
+  });
+
+  // (MODIFICADO) Lógica para añadir los botones al cargar
+  actionButtons.append(favoriteBtn, editBtn, deleteBtn);
+  if (completed) {
+      reflectionPlanBtn.textContent = '💬';
+      reflectionPlanBtn.className = 'reflection-btn';
+      reflectionPlanBtn.setAttribute('data-tooltip', 'Añadir reflexión de éxito');
+      reflectionPlanBtn.setAttribute('aria-label', 'Añadir reflexión de éxito');
+      reflectionPlanBtn.onclick = (e) => { e.stopPropagation(); handleCompletedTaskClick(li); };
+      actionButtons.append(reflectionPlanBtn);
+  } else if (failed) {
+      reflectionPlanBtn.textContent = '📝';
+      reflectionPlanBtn.className = 'plan-btn';
+      reflectionPlanBtn.setAttribute('data-tooltip', 'Añadir plan de acción');
+      reflectionPlanBtn.setAttribute('aria-label', 'Añadir plan de acción');
+      reflectionPlanBtn.onclick = (e) => { e.stopPropagation(); handleFailedTaskClick(li); };
+      actionButtons.append(reflectionPlanBtn);
+  }
+
+  li.append(statusBtn, taskContent, actionButtons);
+  li.dataset.date = date;
+  li.dataset.time = time;
+  return li;
+}
+
+function priorityName(p) {
+  return p === 'high' ? 'Alta' : p === 'medium' ? 'Media' : 'Baja';
 }
