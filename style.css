@@ -8,7 +8,8 @@
   --text-color: #333333;
   --success-color: #4CAF50; 
   --danger-color: #DC3545; 
-  --focus-ring-color: #38A1FF; 
+  --warning-color: #FFC107; /* Para toasts de ánimo y botón de plan */
+  --info-color: #007bff; 
   --task-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -168,6 +169,55 @@ header {
   background-color: #0069D9;
 }
 
+
+/* =========================== */
+/* --- CONTADOR DE TAREAS --- */
+/* =========================== */
+.task-counter {
+  display: flex;
+  justify-content: space-around;
+  background-color: var(--bg-card);
+  padding: 15px 10px;
+  border-radius: 15px;
+  box-shadow: var(--task-box-shadow);
+  margin-bottom: 30px;
+  text-align: center;
+}
+.counter-box {
+  flex-basis: 33%;
+}
+.counter-box span {
+  display: block;
+  font-size: 1.8em;
+  font-weight: bold;
+}
+.counter-box label {
+  font-size: 0.9em;
+  color: #6c757d;
+}
+/* Colores del contador */
+.counter-box:nth-child(1) span { color: var(--secondary-color); } /* Pendientes */
+.counter-box:nth-child(2) span { color: var(--success-color); } /* Completadas */
+.counter-box:nth-child(3) span { color: var(--danger-color); } /* Fallidas */
+
+/* Contador en Alto Contraste */
+body.high-contrast .task-counter {
+    background-color: var(--bg-card);
+    border: 1px solid var(--favorite-color);
+}
+body.high-contrast .counter-box label {
+    color: var(--text-color);
+}
+body.high-contrast .counter-box:nth-child(1) span { color: var(--secondary-color); }
+body.high-contrast .counter-box:nth-child(2) span { color: var(--success-color); }
+body.high-contrast .counter-box:nth-child(3) span { color: var(--danger-color); }
+
+/* Contador en Modo Daltonismo */
+body.daltonism-mode .counter-box:nth-child(1) span { color: var(--secondary-color); } /* Púrpura */
+body.daltonism-mode .counter-box:nth-child(2) span { color: var(--success-color); } /* Naranja */
+body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color); } /* Rojo */
+
+
 /* --- Lista de Tareas y Secciones --- */
 .task-list-container h2 {
     color: var(--text-color);
@@ -250,7 +300,7 @@ header {
 }
 
 /* Tarea Individual */
-.task-list li {
+.task-group li {
   background-color: var(--bg-card);
   margin-bottom: 12px;
   padding: 15px;
@@ -263,39 +313,40 @@ header {
   border: 1px solid transparent; 
 }
 
-.task-list li:hover {
+.task-group li:hover {
   background-color: #f7f7f7;
 }
 
 /* Contenedor de texto y fecha */
-.task-list li .task-content-wrapper {
+.task-group li .task-content-wrapper {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     padding-right: 15px;
+    overflow: hidden; 
+    word-break: break-word;
 }
 
-.task-list li .task-content-wrapper span {
+.task-group li .task-content-wrapper span {
     font-weight: bold;
     padding-right: 0; 
 }
 
-.task-list li .task-content-wrapper small {
+.task-group li .task-content-wrapper small {
     font-size: 0.8em;
     color: #6c757d;
     margin-top: 2px;
-    /* CORRECCIÓN DE AMONTONAMIENTO: Permite saltos de línea donde se inyecta <br> */
     white-space: pre-wrap; 
 }
 
 /* Indicador de Tarea Favorita (Borde alrededor) */
-.task-list li.favorite {
+.task-group li.favorite {
     border: 2px solid var(--favorite-color); 
     box-shadow: 0 0 10px rgba(245, 210, 10, 0.2); 
 }
 
 /* --- Estados de Tarea --- */
-.task-list li .status-btn {
+.task-group li .status-btn {
     width: 28px;
     height: 28px;
     min-width: 28px;
@@ -311,32 +362,32 @@ header {
 }
 
 /* Estado de Tarea Completada (✅) */
-.task-list li.completed {
+.task-group li.completed {
     opacity: 0.8;
     border-left-color: var(--success-color) !important;
 }
-.task-list li.completed .status-btn {
+.task-group li.completed .status-btn {
     border-color: var(--success-color);
     background-color: var(--success-color);
     color: white;
 }
-.task-list li.completed span {
+.task-group li.completed span {
     color: #999; 
     text-decoration: line-through; 
 }
 
 /* Estado de Tarea Fallida (❌) */
-.task-list li.failed {
+.task-group li.failed {
     opacity: 0.9;
     background-color: #fcebeb; 
     border-left-color: var(--danger-color) !important;
 }
-.task-list li.failed .status-btn {
+.task-group li.failed .status-btn {
     border-color: var(--danger-color);
     background-color: var(--danger-color);
     color: white;
 }
-.task-list li.failed span {
+.task-group li.failed span {
     color: var(--danger-color);
     text-decoration: none; 
 }
@@ -344,7 +395,7 @@ header {
 /* --- Botones de Acción (Tooltips) --- */
 .action-buttons {
     display: flex;
-    gap: 8px; /* Separación aumentada */
+    gap: 8px; 
     align-items: center;
 }
 .action-buttons button {
@@ -383,10 +434,110 @@ header {
 }
 
 /* Botón Favorito */
-button.favorite-btn { color: #ffda06; font-size: 1.3em;} /* No favorito es gris */
-.task-list li.favorite button.favorite-btn { color: var(--favorite-color);}
+button.favorite-btn { color: #aaaaaa; font-size: 1.3em;} 
+.task-group li.favorite button.favorite-btn { color: var(--favorite-color);}
 button.edit-btn { color: var(--secondary-color); }
 button.delete-btn { color: var(--danger-color); }
+
+/* Botón de Reflexión (Completada) */
+button.reflection-btn {
+    color: var(--success-color);
+    font-size: 1.1em;
+}
+body.high-contrast button.reflection-btn {
+    color: var(--success-color);
+}
+body.daltonism-mode button.reflection-btn {
+    color: var(--success-color); /* Naranja */
+}
+
+/* Botón de Plan de Acción (Fallida) (NUEVO) */
+button.plan-btn {
+    color: var(--warning-color);
+    font-size: 1.1em;
+}
+body.high-contrast button.plan-btn {
+    color: var(--warning-color);
+}
+body.daltonism-mode button.plan-btn {
+    color: var(--warning-color); /* Naranja */
+}
+
+
+/* =========================== */
+/* --- SECCIÓN DE REFLEXIONES --- */
+/* =========================== */
+#reflections-container {
+    margin-top: 50px;
+    border-top: 2px solid var(--primary-color);
+    padding-top: 20px;
+}
+#reflections-container h2 {
+    text-align: center;
+    color: var(--primary-color);
+}
+.reflection-group {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+li.reflection-item {
+    background-color: var(--bg-card);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: var(--task-box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+li.reflection-item .reflection-text {
+    font-style: italic;
+    color: var(--text-color);
+    quotes: "“" "”";
+}
+li.reflection-item .reflection-text::before { content: open-quote; }
+li.reflection-item .reflection-text::after { content: close-quote; }
+
+li.reflection-item .reflection-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85em;
+    color: #6c757d;
+}
+li.reflection-item .reflection-task {
+    font-weight: bold;
+}
+li.reflection-item .reflection-date {
+    font-style: italic;
+}
+li.reflection-item .delete-reflection-btn {
+    background: none;
+    border: none;
+    color: var(--danger-color);
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* Reflexiones en Alto Contraste */
+body.high-contrast #reflections-container {
+    border-top-color: var(--favorite-color);
+}
+body.high-contrast #reflections-container h2 {
+    color: var(--favorite-color);
+}
+body.high-contrast li.reflection-item {
+    background-color: var(--bg-card);
+    border: 1px solid #444;
+}
+body.high-contrast li.reflection-item .reflection-text {
+    color: var(--text-color);
+}
+body.high-contrast li.reflection-item .reflection-meta {
+    color: var(--text-color);
+}
 
 
 /* =================================== */
@@ -403,47 +554,47 @@ body.high-contrast {
   --text-color: #FFFFFF;
   --success-color: #00FF00;
   --danger-color: #FF0000;
+  --warning-color: #FFD700; 
+  --info-color: #00FFFF; 
   --focus-ring-color: #00FFFF;
   --task-box-shadow: none;
-
   background-color: var(--bg-light);
   color: var(--text-color);
 }
-body.high-contrast .task-list li, body.high-contrast .modal-content {
+body.high-contrast .task-group li, body.high-contrast .modal-content {
   border: 1px solid #444; 
 }
-body.high-contrast .task-list li.failed { background-color: #330000; }
-body.high-contrast .task-list li.favorite button.favorite-btn { color: var(--favorite-color);}
+body.high-contrast .task-group li.failed { background-color: #330000; }
+body.high-contrast .task-group li.favorite button.favorite-btn { color: var(--favorite-color);}
 
 
-/* --- MODO DALTONISMO (Dichromacy - Protanopia/Deuteranopia) --- */
+/* --- MODO DALTONISMO --- */
 body.daltonism-mode {
     --bg-light: #F0F0F0; 
     background-color: var(--bg-light); 
-    
     --primary-color: #006699; 
     --secondary-color: #9933FF; 
-    --success-color: #FF8800; /* Naranja fuerte (reemplaza al verde) */
-    --danger-color: #FF0000; /* Rojo puro */
-    --favorite-color: #38A1FF; /* Azul claro (distinto al oro) */
+    --success-color: #FF8800; /* Naranja */
+    --danger-color: #FF0000; /* Rojo */
+    --favorite-color: #38A1FF; 
+    --warning-color: #FF8800; 
+    --info-color: #9933FF; 
 }
 
-/* Aplicación de colores para el modo daltonismo */
-body.daltonism-mode .task-list li.low {
-    border-left-color: var(--success-color); /* Naranja */
+body.daltonism-mode .priority-header.low {
+    border-color: var(--success-color); /* Naranja */
 }
-body.daltonism-mode .task-list li.medium {
-    border-left-color: var(--secondary-color); /* Púrpura */
+body.daltonism-mode .priority-header.medium {
+    border-color: var(--secondary-color); /* Púrpura */
 }
-body.daltonism-mode .task-list li.high {
-    border-left-color: var(--danger-color); /* Rojo */
+body.daltonism-mode .priority-header.high {
+    border-color: var(--danger-color); /* Rojo */
 }
-
-body.daltonism-mode .task-list li.completed {
+body.daltonism-mode .task-group li.completed {
     border-left-color: #555 !important;
 }
 
-/* --- ESTILOS DEL MODAL DE AYUDA Y BIENVENIDA --- */
+/* --- ESTILOS DEL MODAL --- */
 .modal {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;
@@ -454,14 +605,302 @@ body.daltonism-mode .task-list li.completed {
 .modal-content {
     background-color: var(--bg-card); padding: 30px; border-radius: 10px;
     max-width: 450px; text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
 }
-
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    margin-top: 15px;
+}
+.modal-content textarea {
+    width: 95%;
+    margin: 0 auto;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-family: 'Arial', sans-serif;
+    font-size: 0.95em;
+    background-color: var(--bg-light);
+    color: var(--text-color);
+}
+.modal-content .modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 .modal-option-btn {
     display: block; width: 100%; margin-top: 15px; padding: 10px;
     border: none; border-radius: 8px; text-decoration: none; font-weight: bold;
     color: white; background-color: var(--primary-color); transition: background-color 0.3s;
     text-align: center;
+    box-sizing: border-box; 
 }
 .modal-option-btn.danger-btn { background-color: var(--danger-color); }
 .modal-option-btn:hover { opacity: 0.9; }
 .close-modal-inside-btn { margin-top: 20px; background: none; border: none; color: #6c757d; cursor: pointer; font-size: 0.9em;}
+/* =================================== */
+/* --- CORRECCIONES DE CONTRASTE --- */
+/* =================================== */
+body.high-contrast input,
+body.high-contrast select,
+body.high-contrast button,
+body.high-contrast textarea {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid #FFD700;
+}
+body.high-contrast input::placeholder,
+body.high-contrast textarea::placeholder {
+  color: #000000;
+  opacity: 1; 
+}
+body.high-contrast #addTaskBtn,
+body.high-contrast #contrast-toggle,
+body.high-contrast #daltonism-toggle {
+  background-color: #FFD700;
+  color: #000000;
+  border: none;
+}
+body.high-contrast .modal-option-btn {
+    background-color: #FFD700;
+    color: #000000;
+}
+body.high-contrast .modal-option-btn.danger-btn {
+    background-color: var(--danger-color);
+    color: #FFFFFF;
+}
+
+/* Modo daltónico mejorado */
+body.daltonism-mode {
+  --bg-light: #F8F9FA;
+  --bg-card: #FFFFFF;
+  --text-color: #222222;
+  --primary-color: #004C99;
+  --secondary-color: #AA66CC;
+  --success-color: #FF8800; 
+  --danger-color: #E53935;  
+  --favorite-color: #3399FF;
+}
+body.daltonism-mode input,
+body.daltonism-mode select,
+body.daltonism-mode button,
+body.daltonism-mode textarea {
+  background-color: #FFFFFF;
+  color: #000000;
+  border: 1px solid #999;
+}
+body.daltonism-mode .task-group li {
+  background-color: #FFFFFF;
+  color: #000000;
+}
+body.daltonism-mode h2,
+body.daltonism-mode .priority-header {
+  color: #004C99 !important;
+}
+body.daltonism-mode #addTaskBtn {
+  background-color: #AA66CC;
+  color: #FFFFFF;
+}
+
+/* Botón flotante de ayuda */
+#help-btn {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background-color: var(--secondary-color);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 18px;
+  font-size: 1em;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 3000;
+  transition: background-color 0.3s, transform 0.2s;
+}
+#help-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Pie de página centrado */
+footer {
+  text-align: center;
+  font-size: 0.9em;
+  color: #6c757d;
+  padding: 20px;
+  position: relative;
+}
+footer a {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+/* --- MENÚ FLOTANTE DE ESTADO --- */
+.status-menu {
+  position: absolute;
+  background-color: var(--bg-card);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  display: none;
+}
+.status-menu button {
+  display: block;
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 15px;
+  width: 100%;
+  cursor: pointer;
+  font-size: 0.9em;
+  color: var(--text-color);
+}
+.status-menu button:hover {
+  background-color: var(--secondary-color);
+  color: white;
+}
+body.daltonism-mode .task-group li .task-content-wrapper small {
+  color: #333333 !important;
+}
+/* =================================== */
+/* 🔧 CORRECCIONES FINALES DE CONTRASTE */
+/* =================================== */
+body.high-contrast input[type="date"],
+body.high-contrast input[type="time"],
+body.high-contrast select,
+body.high-contrast #taskInput,
+body.high-contrast textarea {
+  background-color: #FFFFFF !important;
+  color: #000000 !important;
+  border: 2px solid #FFD700 !important;
+}
+body.high-contrast #addTaskBtn,
+body.high-contrast #contrast-toggle,
+body.high-contrast #daltonism-toggle,
+body.high-contrast #help-btn,
+body.high-contrast .survey-btn {
+  background-color: #FFD700 !important;
+  color: #000000 !important;
+  border: none !important;
+}
+body.high-contrast .survey-btn.danger-btn {
+    background-color: var(--danger-color) !important;
+    color: #FFFFFF !important;
+}
+body.high-contrast .tagline,
+body.high-contrast .priority-header.completed-header {
+  color: #FFD700 !important;
+}
+body.high-contrast .status-menu {
+  background-color: #000000 !important;
+  border: 2px solid #FFD700 !important;
+}
+body.high-contrast .status-menu button {
+  color: #FFFFFF !important;
+}
+body.high-contrast .status-menu button:hover {
+  background-color: #FFD700 !important;
+  color: #000000 !important;
+}
+body.high-contrast .task-status-legend {
+  color: #FFD700 !important;
+  border-bottom-color: #FFD700 !important;
+}
+body.high-contrast .completed-icon { color: #00FF00 !important; }
+body.high-contrast .failed-icon { color: #FF0000 !important; }
+
+body.daltonism-mode .tagline {
+  color: #004C99 !important;
+}
+body.daltonism-mode .status-menu {
+  background-color: #FFFFFF !important;
+  border: 1px solid #999 !important;
+}
+body.daltonism-mode .status-menu button {
+  color: #000000 !important;
+}
+body.daltonism-mode .status-menu button:hover {
+  background-color: #AA66CC !important;
+  color: #FFFFFF !important;
+}
+body.high-contrast .priority-header.completed-header {
+  color: #00FF00 !important;
+}
+body.daltonism-mode .priority-header.completed-header {
+  color: #AA66CC !important;
+}
+
+/* =================================== */
+/* 7. TOAST DE RETROALIMENTACIÓN (MODIFICADO) */
+/* =================================== */
+.toast-notification {
+  position: fixed;
+  top: 20px; 
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  padding: 12px 20px;
+  border-radius: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  font-weight: bold;
+  z-index: 5000;
+  opacity: 0;
+  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
+  role: status;
+  aria-live: polite;
+}
+
+.toast-notification.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* Tipo Success (Éxito) */
+.toast-notification.success {
+  background-color: var(--success-color);
+  color: white;
+}
+body.high-contrast .toast-notification.success {
+    background-color: var(--success-color) !important;
+    color: #000000 !important;
+    border: 2px solid #000000;
+}
+body.daltonism-mode .toast-notification.success {
+    background-color: var(--success-color) !important;
+    color: #FFFFFF !important;
+}
+
+/* Tipo Failed (Ánimo) */
+.toast-notification.failed {
+  background-color: var(--warning-color);
+  color: #000000;
+}
+body.high-contrast .toast-notification.failed {
+    background-color: var(--warning-color) !important;
+    color: #000000 !important;
+    border: 2px solid #000000;
+}
+body.daltonism-mode .toast-notification.failed {
+    background-color: var(--warning-color) !important;
+    color: #000000 !important;
+}
+
+/* Tipo Info (Pendiente) (NUEVO) */
+.toast-notification.info {
+  background-color: var(--info-color);
+  color: white;
+}
+body.high-contrast .toast-notification.info {
+    background-color: var(--info-color) !important;
+    color: #000000 !important;
+    border: 2px solid #000000;
+}
+body.daltonism-mode .toast-notification.info {
+    background-color: var(--info-color) !important;
+    color: #FFFFFF !important;
+}
