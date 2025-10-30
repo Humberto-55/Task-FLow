@@ -49,6 +49,21 @@
           <span class="icon" aria-hidden="true">➕</span> Agregar
       </button>
     </section>
+    
+    <section class="task-counter" id="task-counter">
+        <div class="counter-box">
+            <span id="pending-count">0</span>
+            <label>Pendientes</label>
+        </div>
+        <div class="counter-box">
+            <span id="completed-count">0</span>
+            <label>Completadas</label>
+        </div>
+        <div class="counter-box">
+            <span id="failed-count">0</span>
+            <label>No Completadas</label>
+        </div>
+    </section>
 
     <section class="task-list-container">
         <h2>Organizador de Tareas</h2>
@@ -78,13 +93,24 @@
         <h3 class="priority-header failed-header">❌ Tareas No Completadas</h3>
         <ul id="failed-tasks-list" class="task-group failed-group" aria-live="polite"></ul>
     </section>
+
+    <section id="reflections-container">
+        <h2>Mi Diario de Reflexiones</h2>
+        
+        <h3 class="priority-header completed-header">Reflexiones de Tareas Completadas</h3>
+        <ul id="completed-reflections-list" class="reflection-group">
+            </ul>
+        
+        <h3 class="priority-header failed-header">Planes de Acción (Tareas No Completadas)</h3>
+        <ul id="failed-reflections-list" class="reflection-group">
+            </ul>
+    </section>
+
   </main>
 
   <button id="help-btn" aria-controls="help-modal" title="Ayuda">
   ❓ Ayuda
 </button>
-
-
 
   <footer>
     <p>© 2025 Task Flow — Desarrollado por Autonomous Hearing</p>
@@ -95,11 +121,8 @@
     <div class="modal-content">
         <h3 id="modal-title">¿Cómo te podemos ayudar?</h3>
         <p>Selecciona la opción que se ajuste a tu necesidad. Serás dirigido a un formulario externo para brindarte la mejor atención.</p>
-        
         <a href="#" target="_blank" class="survey-btn modal-option-btn" id="link-dudas">Tengo una Duda o Sugerencia</a>
-        
         <a href="#" target="_blank" class="survey-btn modal-option-btn danger-btn" id="link-tecnico">Reportar un Problema Técnico</a>
-        
         <button id="close-modal-btn" aria-label="Cerrar ventana de ayuda" class="close-modal-inside-btn">Cerrar</button>
     </div>
   </div>
@@ -112,22 +135,35 @@
       </div>
   </div>
 
-  <script src="scripts.js"></script>
-  
   <div id="recovery-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="recovery-title" hidden>
     <div class="modal-content">
-        <h3 id="recovery-title">Tarea No Completada/Vencida</h3>
-        <p>Parece que esta tarea no se completó a tiempo. Por favor, justifica el motivo o reasígnala.</p>
-        
-        <form id="recovery-form">
-            <textarea id="failure-reason" placeholder="Motivo por el que no se completó (Opcional)" rows="3"></textarea>
-            
+        <h3 id="recovery-title">¡Ánimo! A la próxima lo lograrás</h3>
+        <p id="recovery-text">Esta tarea no se completó. ¿Qué puedes hacer diferente la próxima vez? (Opcional)</p>
+        <form id="recovery-form" onsubmit="return false;">
+            <textarea id="failure-reason" placeholder="Escribe aquí qué puedes hacer para la próxima para cumplir esta tarea..." rows="3"></textarea>
             <div class="modal-actions">
-                <button type="button" id="confirm-reason-btn" class="survey-btn danger-btn">Registrar Motivo y Archivar</button>
+                <button type="button" id="confirm-reason-btn" class="survey-btn danger-btn">Registrar Plan y Archivar</button>
                 <button type="button" id="reassign-task-btn" class="survey-btn">Reasignar Tarea</button>
             </div>
         </form>
     </div>
 </div>
+
+  <div id="reflection-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="reflection-title" hidden>
+    <div class="modal-content">
+        <h3 id="reflection-title">¡Felicidades por completar tu tarea!</h3>
+        <p>Opcional: ¿Quieres añadir una reflexión sobre este logro?</p>
+        <form id="reflection-form" onsubmit="return false;">
+            <textarea id="reflection-text" placeholder="¿Cómo te sentiste al completar esta tarea?" rows="3"></textarea>
+            <div class="modal-actions">
+                <button type="button" id="confirm-reflection-btn" class="survey-btn">Guardar Reflexión</button>
+                <button type="button" id="close-reflection-btn" class="close-modal-inside-btn">Cerrar</button>
+            </div>
+        </form>
+    </div>
+  </div>
+
+  <script src="scripts.js"></script>
+  
 </body>
 </html>
