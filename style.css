@@ -9,7 +9,7 @@
   --success-color: #4CAF50; 
   --danger-color: #DC3545; 
   --warning-color: #FFC107; /* Para toasts de ánimo y botón de plan */
-  --info-color: #007bff; 
+  --info-color: #007bff; /* Para toasts de 'pendiente' */
   --task-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
@@ -75,6 +75,7 @@ header {
     gap: 10px;
     order: 2;
     margin-left: auto;
+    align-items: center; 
 }
 
 #contrast-toggle, #daltonism-toggle {
@@ -86,6 +87,27 @@ header {
     cursor: pointer;
     font-size: 0.9em;
     transition: background-color 0.3s;
+}
+
+/* =========================== */
+/* --- NUEVO TOGGLE ETIQUETAS --- */
+/* =========================== */
+.toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9em;
+  background-color: var(--bg-card);
+  color: var(--text-color);
+  border: 1px solid #ced4da;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+.tooltip-toggle-label {
+  cursor: pointer;
+}
+.tooltip-toggle-checkbox {
+  cursor: pointer;
 }
 
 /* --- Campo de Entrada de Tarea (Input) --- */
@@ -114,7 +136,6 @@ header {
   order: 1;
 }
 
-/* --- Estilos para la Nueva Leyenda de Fecha y Hora --- */
 .date-time-group {
     display: flex;
     flex-direction: column;
@@ -195,12 +216,10 @@ header {
   font-size: 0.9em;
   color: #6c757d;
 }
-/* Colores del contador */
-.counter-box:nth-child(1) span { color: var(--secondary-color); } /* Pendientes */
-.counter-box:nth-child(2) span { color: var(--success-color); } /* Completadas */
-.counter-box:nth-child(3) span { color: var(--danger-color); } /* Fallidas */
+.counter-box:nth-child(1) span { color: var(--secondary-color); } 
+.counter-box:nth-child(2) span { color: var(--success-color); } 
+.counter-box:nth-child(3) span { color: var(--danger-color); } 
 
-/* Contador en Alto Contraste */
 body.high-contrast .task-counter {
     background-color: var(--bg-card);
     border: 1px solid var(--favorite-color);
@@ -212,10 +231,9 @@ body.high-contrast .counter-box:nth-child(1) span { color: var(--secondary-color
 body.high-contrast .counter-box:nth-child(2) span { color: var(--success-color); }
 body.high-contrast .counter-box:nth-child(3) span { color: var(--danger-color); }
 
-/* Contador en Modo Daltonismo */
-body.daltonism-mode .counter-box:nth-child(1) span { color: var(--secondary-color); } /* Púrpura */
-body.daltonism-mode .counter-box:nth-child(2) span { color: var(--success-color); } /* Naranja */
-body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color); } /* Rojo */
+body.daltonism-mode .counter-box:nth-child(1) span { color: var(--secondary-color); } 
+body.daltonism-mode .counter-box:nth-child(2) span { color: var(--success-color); } 
+body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color); } 
 
 
 /* --- Lista de Tareas y Secciones --- */
@@ -264,18 +282,9 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
     color: var(--text-color);
 }
 
-.priority-header.high {
-    border-color: var(--danger-color); 
-}
-
-.priority-header.medium {
-    border-color: #FFC107; 
-}
-
-.priority-header.low {
-    border-color: var(--success-color); 
-}
-
+.priority-header.high { border-color: var(--danger-color); }
+.priority-header.medium { border-color: #FFC107; }
+.priority-header.low { border-color: var(--success-color); }
 .priority-header.favorite-header {
     border-color: var(--favorite-color); 
     font-size: 1.2em;
@@ -283,7 +292,6 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
     margin-top: 15px;
     margin-bottom: 10px;
 }
-
 .priority-header.completed-header {
     border-color: var(--success-color); 
     color: #6c757d;
@@ -317,6 +325,16 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
   background-color: #f7f7f7;
 }
 
+/* Bug de Alto Contraste al hacer hover */
+body.high-contrast .task-group li:hover {
+  background-color: #2a2a2a; 
+}
+body.high-contrast .task-group li:hover .task-content-wrapper span,
+body.high-contrast .task-group li:hover .task-content-wrapper small,
+body.high-contrast .task-group li:hover .action-label {
+  color: var(--text-color);
+}
+
 /* Contenedor de texto y fecha */
 .task-group li .task-content-wrapper {
     display: flex;
@@ -338,19 +356,26 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
     margin-top: 2px;
     white-space: pre-wrap; 
 }
+/* (CORREGIDO) Forzar color de texto en <small> para alto contraste */
+body.high-contrast .task-group li .task-content-wrapper small {
+    color: var(--text-color);
+    opacity: 0.8;
+}
 
-/* Indicador de Tarea Favorita (Borde alrededor) */
+
+/* Indicador de Tarea Favorita */
 .task-group li.favorite {
     border: 2px solid var(--favorite-color); 
     box-shadow: 0 0 10px rgba(245, 210, 10, 0.2); 
+    background-color: #fffbeb; /* (NUEVO) Fondo amarillo suave */
 }
 
 /* --- Estados de Tarea --- */
+
 .task-group li .status-btn {
     width: 28px;
     height: 28px;
     min-width: 28px;
-    margin-right: 15px;
     padding: 0;
     font-size: 1.2em;
     font-weight: bold;
@@ -361,22 +386,21 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
     line-height: 1; 
 }
 
-/* Estado de Tarea Completada (✅) */
 .task-group li.completed {
     opacity: 0.8;
     border-left-color: var(--success-color) !important;
+    background-color: #f0fff0; /* (NUEVO) Fondo verde suave */
 }
 .task-group li.completed .status-btn {
     border-color: var(--success-color);
     background-color: var(--success-color);
     color: white;
 }
-.task-group li.completed span {
+.task-group li.completed .task-content-wrapper span {
     color: #999; 
     text-decoration: line-through; 
 }
 
-/* Estado de Tarea Fallida (❌) */
 .task-group li.failed {
     opacity: 0.9;
     background-color: #fcebeb; 
@@ -387,7 +411,7 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
     background-color: var(--danger-color);
     color: white;
 }
-.task-group li.failed span {
+.task-group li.failed .task-content-wrapper span {
     color: var(--danger-color);
     text-decoration: none; 
 }
@@ -395,8 +419,9 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
 /* --- Botones de Acción (Tooltips) --- */
 .action-buttons {
     display: flex;
-    gap: 8px; 
-    align-items: center;
+    gap: 12px; 
+    align-items: flex-start;
+    text-align: center;
 }
 .action-buttons button {
     background: none;
@@ -406,13 +431,33 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
     padding: 5px;
     transition: color 0.2s, transform 0.1s;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.2;
+    min-width: 40px; 
 }
 .action-buttons button:hover {
     transform: scale(1.1);
 }
 
-/* Tooltips */
-.action-buttons button::after {
+/* =========================== */
+/* --- ETIQUETAS Y TOOLTIPS --- */
+/* =========================== */
+.action-label {
+  display: none;
+  font-size: 0.7em;
+  font-weight: normal;
+  color: var(--text-color);
+  margin-top: 2px;
+  line-height: 1;
+}
+
+body.tooltips-visible .action-label {
+  display: block;
+}
+
+body:not(.tooltips-visible) .action-buttons button:hover::after {
   content: attr(data-tooltip);
   position: absolute;
   bottom: 125%; 
@@ -424,13 +469,22 @@ body.daltonism-mode .counter-box:nth-child(3) span { color: var(--danger-color);
   border-radius: 5px;
   font-size: 0.75em;
   white-space: nowrap;
-  opacity: 0;
+  opacity: 1;
   pointer-events: none;
   transition: opacity 0.3s;
   z-index: 10; 
 }
-.action-buttons button:hover::after {
-  opacity: 1;
+
+body.high-contrast .action-buttons button {
+  background: none;
+  border: none;
+  color: var(--text-color); 
+}
+body.high-contrast .action-buttons button:hover {
+  color: var(--secondary-color);
+}
+body.high-contrast .action-label {
+  color: var(--text-color);
 }
 
 /* Botón Favorito */
@@ -444,24 +498,16 @@ button.reflection-btn {
     color: var(--success-color);
     font-size: 1.1em;
 }
-body.high-contrast button.reflection-btn {
-    color: var(--success-color);
-}
-body.daltonism-mode button.reflection-btn {
-    color: var(--success-color); /* Naranja */
-}
+body.high-contrast button.reflection-btn { color: var(--success-color); }
+body.daltonism-mode button.reflection-btn { color: var(--success-color); }
 
-/* Botón de Plan de Acción (Fallida) (NUEVO) */
+/* Botón de Plan de Acción (Fallida) */
 button.plan-btn {
     color: var(--warning-color);
     font-size: 1.1em;
 }
-body.high-contrast button.plan-btn {
-    color: var(--warning-color);
-}
-body.daltonism-mode button.plan-btn {
-    color: var(--warning-color); /* Naranja */
-}
+body.high-contrast button.plan-btn { color: var(--warning-color); }
+body.daltonism-mode button.plan-btn { color: var(--warning-color); }
 
 
 /* =========================== */
@@ -508,9 +554,11 @@ li.reflection-item .reflection-meta {
 }
 li.reflection-item .reflection-task {
     font-weight: bold;
+    margin-right: 10px;
 }
 li.reflection-item .reflection-date {
     font-style: italic;
+    margin-right: auto; 
 }
 li.reflection-item .delete-reflection-btn {
     background: none;
@@ -521,23 +569,14 @@ li.reflection-item .delete-reflection-btn {
     padding: 5px;
 }
 
-/* Reflexiones en Alto Contraste */
-body.high-contrast #reflections-container {
-    border-top-color: var(--favorite-color);
-}
-body.high-contrast #reflections-container h2 {
-    color: var(--favorite-color);
-}
+body.high-contrast #reflections-container { border-top-color: var(--favorite-color); }
+body.high-contrast #reflections-container h2 { color: var(--favorite-color); }
 body.high-contrast li.reflection-item {
     background-color: var(--bg-card);
     border: 1px solid #444;
 }
-body.high-contrast li.reflection-item .reflection-text {
-    color: var(--text-color);
-}
-body.high-contrast li.reflection-item .reflection-meta {
-    color: var(--text-color);
-}
+body.high-contrast li.reflection-item .reflection-text { color: var(--text-color); }
+body.high-contrast li.reflection-item .reflection-meta { color: var(--text-color); }
 
 
 /* =================================== */
@@ -561,11 +600,13 @@ body.high-contrast {
   background-color: var(--bg-light);
   color: var(--text-color);
 }
-body.high-contrast .task-group li, body.high-contrast .modal-content {
+.task-group li, body.high-contrast .modal-content {
   border: 1px solid #444; 
 }
-body.high-contrast .task-group li.failed { background-color: #330000; }
-body.high-contrast .task-group li.favorite button.favorite-btn { color: var(--favorite-color);}
+/* (CORREGIDO) Fondos de estado en Alto Contraste */
+body.high-contrast .task-group li.failed { background-color: #330000 !important; }
+body.high-contrast .task-group li.completed { background-color: #003300 !important; }
+body.high-contrast .task-group li.favorite { background-color: #333300 !important; }
 
 
 /* --- MODO DALTONISMO --- */
@@ -581,17 +622,15 @@ body.daltonism-mode {
     --info-color: #9933FF; 
 }
 
-body.daltonism-mode .priority-header.low {
-    border-color: var(--success-color); /* Naranja */
-}
-body.daltonism-mode .priority-header.medium {
-    border-color: var(--secondary-color); /* Púrpura */
-}
-body.daltonism-mode .priority-header.high {
-    border-color: var(--danger-color); /* Rojo */
-}
-body.daltonism-mode .task-group li.completed {
+body.daltonism-mode .priority-header.low { border-color: var(--success-color); }
+body.daltonism-mode .priority-header.medium { border-color: var(--secondary-color); }
+body.daltonism-mode .priority-header.high { border-color: var(--danger-color); }
+body.daltonism-mode .task-group li.completed { 
     border-left-color: #555 !important;
+    background-color: #fff8f0; /* Naranja suave */
+}
+body.daltonism-mode .task-group li.favorite { 
+    background-color: #f0f8ff; /* Azul suave */
 }
 
 /* --- ESTILOS DEL MODAL --- */
@@ -641,6 +680,23 @@ body.daltonism-mode .task-group li.completed {
 .modal-option-btn.danger-btn { background-color: var(--danger-color); }
 .modal-option-btn:hover { opacity: 0.9; }
 .close-modal-inside-btn { margin-top: 20px; background: none; border: none; color: #6c757d; cursor: pointer; font-size: 0.9em;}
+
+/* Botón "Cerrar/Cancelar" */
+.modal .modal-actions .cancel-btn {
+  background: none;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--text-color);
+}
+body.high-contrast .modal .modal-actions .cancel-btn {
+  background-color: #000;
+  color: #FFD700;
+  border-color: #FFD700;
+}
+
+
 /* =================================== */
 /* --- CORRECCIONES DE CONTRASTE --- */
 /* =================================== */
@@ -659,7 +715,8 @@ body.high-contrast textarea::placeholder {
 }
 body.high-contrast #addTaskBtn,
 body.high-contrast #contrast-toggle,
-body.high-contrast #daltonism-toggle {
+body.high-contrast #daltonism-toggle,
+body.high-contrast .toggle-wrapper { 
   background-color: #FFD700;
   color: #000000;
   border: none;
@@ -687,7 +744,8 @@ body.daltonism-mode {
 body.daltonism-mode input,
 body.daltonism-mode select,
 body.daltonism-mode button,
-body.daltonism-mode textarea {
+body.daltonism-mode textarea,
+body.daltonism-mode .toggle-wrapper { 
   background-color: #FFFFFF;
   color: #000000;
   border: 1px solid #999;
@@ -704,6 +762,19 @@ body.daltonism-mode #addTaskBtn {
   background-color: #AA66CC;
   color: #FFFFFF;
 }
+
+/* (CORREGIDO) Fondos de estado en Alto Contraste + Daltonismo */
+body.high-contrast.daltonism-mode .task-group li.completed {
+    background-color: #003300 !important; /* Verde oscuro */
+    border-left-color: var(--success-color) !important;
+}
+body.high-contrast.daltonism-mode .task-group li.failed {
+    background-color: #330000 !important; /* Rojo oscuro */
+}
+body.high-contrast.daltonism-mode .task-group li.favorite {
+    background-color: #333300 !important; /* Amarillo oscuro */
+}
+
 
 /* Botón flotante de ayuda */
 #help-btn {
@@ -726,6 +797,12 @@ body.daltonism-mode #addTaskBtn {
   background-color: #0056b3;
   transform: scale(1.05);
 }
+body.high-contrast #help-btn { 
+    background-color: #FFD700 !important;
+    color: #000000 !important;
+    border: none !important;
+}
+
 
 /* Pie de página centrado */
 footer {
@@ -749,6 +826,7 @@ footer a {
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
   z-index: 9999;
   display: none;
+  min-width: 220px; 
 }
 .status-menu button {
   display: block;
@@ -783,7 +861,6 @@ body.high-contrast textarea {
 body.high-contrast #addTaskBtn,
 body.high-contrast #contrast-toggle,
 body.high-contrast #daltonism-toggle,
-body.high-contrast #help-btn,
 body.high-contrast .survey-btn {
   background-color: #FFD700 !important;
   color: #000000 !important;
@@ -801,8 +878,11 @@ body.high-contrast .status-menu {
   background-color: #000000 !important;
   border: 2px solid #FFD700 !important;
 }
+/* (CORREGIDO) Bug de menú blanco-sobre-blanco */
 body.high-contrast .status-menu button {
   color: #FFFFFF !important;
+  background-color: transparent !important;
+  border: none !important;
 }
 body.high-contrast .status-menu button:hover {
   background-color: #FFD700 !important;
@@ -903,4 +983,39 @@ body.high-contrast .toast-notification.info {
 body.daltonism-mode .toast-notification.info {
     background-color: var(--info-color) !important;
     color: #FFFFFF !important;
+}
+
+
+/* ================================================= */
+/* 🔧 (¡¡MODIFICADO OTRA VEZ!!) CORRECCIÓN ALTO CONTRASTE + DALTONISMO */
+/* ================================================= */
+
+/* Forzar texto blanco SÓLO en tareas con fondo oscuro (completadas, fallidas, favoritas) */
+body.high-contrast.daltonism-mode .task-group li.completed,
+body.high-contrast.daltonism-mode .task-group li.failed,
+body.high-contrast.daltonism-mode .task-group li.favorite {
+  color: #FFFFFF !important; /* Forzar color blanco */
+}
+
+/* Forzar texto blanco en elementos internos de esas tareas */
+body.high-contrast.daltonism-mode .task-group li.completed .task-content-wrapper span,
+body.high-contrast.daltonism-mode .task-group li.completed .task-content-wrapper small,
+body.high-contrast.daltonism-mode .task-group li.completed .action-label,
+body.high-contrast.daltonism-mode .task-group li.failed .task-content-wrapper span,
+body.high-contrast.daltonism-mode .task-group li.failed .task-content-wrapper small,
+body.high-contrast.daltonism-mode .task-group li.failed .action-label,
+body.high-contrast.daltonism-mode .task-group li.favorite .task-content-wrapper span,
+body.high-contrast.daltonism-mode .task-group li.favorite .task-content-wrapper small,
+body.high-contrast.daltonism-mode .task-group li.favorite .action-label {
+    color: #FFFFFF !important; /* Forzar color blanco */
+}
+
+/* Corregir hover para TODAS las tareas (incluyendo pendientes) */
+body.high-contrast.daltonism-mode .task-group li:hover {
+    background-color: #2a2a2a !important;
+}
+body.high-contrast.daltonism-mode .task-group li:hover .task-content-wrapper span,
+body.high-contrast.daltonism-mode .task-group li:hover .task-content-wrapper small,
+body.high-contrast.daltonism-mode .task-group li:hover .action-label {
+    color: #FFFFFF !important; /* Forzar color blanco en hover */
 }
