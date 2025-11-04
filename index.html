@@ -22,6 +22,11 @@
             <button id="daltonism-toggle" aria-label="Activar o desactivar modo daltónico" title="Modo Daltonismo">
                 <span class="icon" aria-hidden="true">🎨</span> Modo Daltonismo
             </button>
+            
+            <div class="toggle-wrapper" title="Muestra u oculta las etiquetas de texto en los botones de acción">
+                <label for="tooltip-toggle" class="tooltip-toggle-label">Mostrar etiquetas:</label>
+                <input type="checkbox" id="tooltip-toggle" class="tooltip-toggle-checkbox">
+            </div>
         </div>
     </div>
   </header>
@@ -127,24 +132,45 @@
     </div>
   </div>
   
-  <div id="welcome-modal" class="modal welcome-modal" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
-      <div class="modal-content">
-          <h3 id="welcome-title">¡Bienvenido a Task Flow!</h3>
-          <p>Estás en el sitio para planificar y contemplar todos tus pendientes, llevando un seguimiento de ellos. No tendrás por qué preocuparte de olvidarte de algo que tienes que hacer, ya que sea en donde te encuentres llevas tu lista de actividades contigo para así cumplir un logro a la vez sin pendientes en un santiamén.</p>
-          <button id="close-welcome-btn" class="survey-btn">Comenzar a Organizar</button>
-      </div>
+  <div id="welcome-modal" class="modal welcome-modal visible" role="dialog" aria-modal="true" aria-labelledby="welcome-title">
+    <div class="modal-content">
+        <h3 id="welcome-title">¡Bienvenido a Task Flow!</h3>
+        
+        <div id="welcome-intro-text" style="text-align: left; max-width: 95%; margin: 0 auto 15px auto;">
+            <p style="margin-bottom: 10px;">Sabemos que tu día a día está lleno de ideas, proyectos, fechas de entrega y pendientes. Ya sea que estés preparando una presentación, organizando un proyecto creativo, llevando el seguimiento de pacientes o administrando papeleo, la carga mental puede ser agotadora.</p>
+            <p style="margin-bottom: 10px;">Task Flow está diseñado para ser tu compañero de organización más sencillo. <strong>No necesitas ser un experto en tecnología.</strong></p>
+            <p style="margin-bottom: 10px;">Es un lugar para vaciar tu mente y poner orden a tus ideas, desde lo más urgente hasta lo que puede esperar.</p>
+            <p style="margin-bottom: 10px;"><strong>¿Es tu primera vez aquí?</strong> Te recomendamos el <strong>tutorial rápido</strong> (1 minuto) para ver lo fácil que es empezar.</p>
+        </div>
+
+        <div class="modal-actions" id="tutorial-initial-options">
+            <button id="start-tutorial-btn" class="survey-btn">Ver Tutorial</button>
+            <button id="skip-tutorial-btn" class="survey-btn">Omitir</button>
+        </div>
+        <div id="tutorial-steps" style="display:none; margin-top:12px;">
+          <p id="tutorial-text"></p>
+          <div class="modal-actions" style="display:flex; flex-direction:row; gap:8px; justify-content:center; margin-top:10px;">
+            <button id="tutorial-prev" class="cancel-btn">Anterior</button>
+            <button id="tutorial-next" class="survey-btn">Siguiente</button>
+            <button id="tutorial-skip" class="cancel-btn">Omitir</button>
+          </div>
+        </div>
+    </div>
   </div>
+
 
   <div id="recovery-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="recovery-title" hidden>
     <div class="modal-content">
         <h3 id="recovery-title">¡Ánimo! A la próxima lo lograrás</h3>
         <p id="recovery-text">Esta tarea no se completó. ¿Qué puedes hacer diferente la próxima vez? (Opcional)</p>
+        
         <form id="recovery-form" onsubmit="return false;">
             <textarea id="failure-reason" placeholder="Escribe aquí qué puedes hacer para la próxima para cumplir esta tarea..." rows="3"></textarea>
+            
             <div class="modal-actions">
                 <button type="button" id="confirm-reason-btn" class="survey-btn danger-btn">Registrar Plan y Archivar</button>
                 <button type="button" id="reassign-task-btn" class="survey-btn">Reasignar Tarea</button>
-            </div>
+                <button type="button" id="cancel-recovery-btn" class="cancel-btn">Cancelar</button> </div>
         </form>
     </div>
 </div>
@@ -153,8 +179,10 @@
     <div class="modal-content">
         <h3 id="reflection-title">¡Felicidades por completar tu tarea!</h3>
         <p>Opcional: ¿Quieres añadir una reflexión sobre este logro?</p>
+        
         <form id="reflection-form" onsubmit="return false;">
             <textarea id="reflection-text" placeholder="¿Cómo te sentiste al completar esta tarea?" rows="3"></textarea>
+            
             <div class="modal-actions">
                 <button type="button" id="confirm-reflection-btn" class="survey-btn">Guardar Reflexión</button>
                 <button type="button" id="close-reflection-btn" class="close-modal-inside-btn">Cerrar</button>
